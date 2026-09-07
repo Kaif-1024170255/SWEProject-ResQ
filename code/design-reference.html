@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ResQ — Design Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14213D;
+    --ink-soft:#2B3350;
+    --paper:#EEF0EE;
+    --paper-raised:#FFFFFF;
+    --slate:#5B6670;
+    --slate-line:#D8DCD8;
+    --amber:#D98E2B;
+    --amber-bg:#FBEEDA;
+    --teal:#1F7A6C;
+    --teal-bg:#E1F0EC;
+    --rust:#B23A2F;
+    --rust-bg:#F8E4E1;
+    --text:#20242B;
+    --font-body: 'Public Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--text);
+    font-family:var(--font-body);
+    line-height:1.5;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:56px 32px 120px;}
+  .doc-title{
+    font-size:14px;
+    font-family:var(--font-mono);
+    color:var(--slate);
+    letter-spacing:0.02em;
+    margin-bottom:6px;
+  }
+  h1.hero{
+    font-size:40px;
+    font-weight:700;
+    margin:0 0 8px;
+    color:var(--ink);
+    max-width:16ch;
+  }
+  .hero-sub{
+    font-size:17px;
+    color:var(--slate);
+    max-width:62ch;
+    margin:0 0 48px;
+  }
+  section.block{
+    margin-bottom:64px;
+    border-top:1px solid var(--slate-line);
+    padding-top:28px;
+  }
+  h2.section-title{
+    font-size:12px;
+    font-family:var(--font-mono);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--slate);
+    margin:0 0 20px;
+    font-weight:500;
+  }
+  p.note{color:var(--slate);font-size:14px;max-width:60ch;}
+
+  /* Color swatches */
+  .swatches{display:grid;grid-template-columns:repeat(6, minmax(0,1fr));gap:12px;}
+  .swatch{border:1px solid var(--slate-line);background:var(--paper-raised);min-width:0;}
+  .swatch .fill{height:64px;width:100%;}
+  .swatch .meta{padding:8px 10px;font-family:var(--font-mono);font-size:11px;}
+  .swatch .meta .name{display:block;font-weight:600;color:var(--text);}
+  .swatch .meta .hex{display:block;color:var(--slate);}
+
+  /* Type scale */
+  .type-row{display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--slate-line);padding:14px 0;}
+  .type-row:last-child{border-bottom:none;}
+  .type-sample{color:var(--ink);}
+  .type-label{font-family:var(--font-mono);font-size:11px;color:var(--slate);white-space:nowrap;padding-left:24px;}
+  .t-h1{font-size:34px;font-weight:700;}
+  .t-h2{font-size:24px;font-weight:700;}
+  .t-h3{font-size:18px;font-weight:600;}
+  .t-body{font-size:16px;font-weight:400;}
+  .t-small{font-size:13px;color:var(--slate);}
+  .t-mono{font-family:var(--font-mono);font-size:14px;letter-spacing:0.01em;}
+
+  /* Status chips */
+  .chip-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .chip{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--font-mono);font-size:12px;font-weight:600;
+    padding:6px 10px;background:var(--paper-raised);
+    border:1px solid var(--slate-line);border-left:3px solid var(--slate);
+  }
+  .chip .dot{width:6px;height:6px;background:var(--slate);}
+  .chip.unverified{border-left-color:var(--amber);} .chip.unverified .dot{background:var(--amber);}
+  .chip.verified{border-left-color:var(--teal);} .chip.verified .dot{background:var(--teal);}
+  .chip.progress{border-left-color:var(--ink);} .chip.progress .dot{background:var(--ink);}
+  .chip.resolved{border-left-color:var(--teal);} .chip.resolved .dot{background:var(--teal);}
+  .chip.critical{border-left-color:var(--rust);} .chip.critical .dot{background:var(--rust);}
+
+  /* Buttons */
+  .btn-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;}
+  .btn{
+    font-family:var(--font-body);font-size:14px;font-weight:600;
+    padding:11px 20px;border-radius:3px;border:1px solid transparent;cursor:pointer;
+  }
+  .btn-primary{background:var(--ink);color:#fff;}
+  .btn-secondary{background:transparent;color:var(--ink);border-color:var(--ink);}
+  .btn-danger{background:var(--rust);color:#fff;}
+  .btn-ghost{background:transparent;color:var(--slate);}
+
+  /* Dispatch log row (core UI pattern) */
+  .log{border:1px solid var(--slate-line);background:var(--paper-raised);}
+  .log-row{
+    display:grid;
+    grid-template-columns:96px 1fr 140px 120px;
+    gap:16px;align-items:center;
+    padding:14px 16px;
+    border-bottom:1px solid var(--slate-line);
+  }
+  .log-row:last-child{border-bottom:none;}
+  .log-row .rid{font-family:var(--font-mono);font-size:12px;color:var(--slate);}
+  .log-row .desc{font-size:14px;}
+  .log-row .desc .cat{display:block;font-size:11px;font-family:var(--font-mono);color:var(--slate);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px;}
+  .log-row .time{font-family:var(--font-mono);font-size:12px;color:var(--slate);text-align:right;}
+
+  /* Map + panel layout sample */
+  .console{
+    display:grid;grid-template-columns:340px 1fr;
+    border:1px solid var(--slate-line);background:var(--paper-raised);
+    height:340px;
+  }
+  .console .rail{border-right:1px solid var(--slate-line);overflow:hidden;}
+  .console .rail-head{padding:14px 16px;border-bottom:1px solid var(--slate-line);font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--slate);}
+  .console .map{
+    background:
+      linear-gradient(var(--slate-line) 1px, transparent 1px) 0 0/28px 28px,
+      linear-gradient(90deg, var(--slate-line) 1px, transparent 1px) 0 0/28px 28px,
+      #E4E8E4;
+    position:relative;
+  }
+  .pin{position:absolute;width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,0.15);}
+  .pin.amber{background:var(--amber);} .pin.teal{background:var(--teal);} .pin.rust{background:var(--rust);}
+
+  /* Progression / lifecycle - legitimate numbered sequence */
+  .stages{display:flex;border:1px solid var(--slate-line);background:var(--paper-raised);}
+  .stage{flex:1;padding:16px;border-right:1px solid var(--slate-line);position:relative;}
+  .stage:last-child{border-right:none;}
+  .stage .num{font-family:var(--font-mono);font-size:11px;color:var(--slate);}
+  .stage .label{font-weight:600;font-size:14px;margin-top:4px;}
+  .stage.active{background:var(--teal-bg);}
+  .stage.active .label{color:var(--teal);}
+
+  .principles{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .principle h3{font-size:15px;margin:0 0 6px;color:var(--ink);}
+  .principle p{font-size:14px;color:var(--slate);margin:0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="doc-title">RESQ / DESIGN REFERENCE / v1</div>
+  <h1 class="hero">Field&nbsp;Ops Ledger</h1>
+  <p class="hero-sub">A calm, legible operations console for coordinating emergency response — built to feel like a dispatch desk, not a startup landing page. Reference this file before styling any screen.</p>
+
+  <section class="block">
+    <h2 class="section-title">01 — Color</h2>
+    <div class="swatches">
+      <div class="swatch"><div class="fill" style="background:var(--ink)"></div><div class="meta"><span class="name">Ink</span><span class="hex">#14213D</span></div></div>
+      <div class="swatch"><div class="fill" style="background:var(--paper);border-bottom:1px solid var(--slate-line)"></div><div class="meta"><span class="name">Paper</span><span class="hex">#EEF0EE</span></div></div>
+      <div class="swatch"><div class="fill" style="background:var(--slate)"></div><div class="meta"><span class="name">Slate</span><span class="hex">#5B6670</span></div></div>
+      <div class="swatch"><div class="fill" style="background:var(--amber)"></div><div class="meta"><span class="name">Signal Amber</span><span class="hex">#D98E2B</span></div></div>
+      <div class="swatch"><div class="fill" style="background:var(--teal)"></div><div class="meta"><span class="name">Response Teal</span><span class="hex">#1F7A6C</span></div></div>
+      <div class="swatch"><div class="fill" style="background:var(--rust)"></div><div class="meta"><span class="name">Alert Rust</span><span class="hex">#B23A2F</span></div></div>
+    </div>
+    <p class="note">Ink and Paper carry the interface. Slate is for secondary text and hairline borders. Amber, Teal, and Rust are reserved <em>only</em> for status meaning (pending, active/resolved, critical) — never used decoratively.</p>
+  </section>
+
+  <section class="block">
+    <h2 class="section-title">02 — Typography</h2>
+    <div class="type-row"><div class="type-sample t-h1">Verify and dispatch faster</div><div class="type-label">Public Sans / 700 / 34px</div></div>
+    <div class="type-row"><div class="type-sample t-h2">Open requests near you</div><div class="type-label">Public Sans / 700 / 24px</div></div>
+    <div class="type-row"><div class="type-sample t-h3">Water shortage — Sector 4</div><div class="type-label">Public Sans / 600 / 18px</div></div>
+    <div class="type-row"><div class="type-sample t-body">A volunteer has claimed this request. You will be notified when it is marked resolved.</div><div class="type-label">Public Sans / 400 / 16px</div></div>
+    <div class="type-row"><div class="type-sample t-small">Submitted 6 minutes ago</div><div class="type-label">Public Sans / 400 / 13px</div></div>
+    <div class="type-row"><div class="type-sample t-mono">REQ-2026-004821 · 30.9010, 75.8573</div><div class="type-label">IBM Plex Mono / 400 / 14px</div></div>
+    <p class="note">Public Sans carries all headings and reading text — a civic-infrastructure typeface, not a startup display face. IBM Plex Mono is used only for genuinely tabular or data-like content: request IDs, coordinates, timestamps, status codes.</p>
+  </section>
+
+  <section class="block">
+    <h2 class="section-title">03 — Status Chips</h2>
+    <div class="chip-row">
+      <span class="chip unverified"><span class="dot"></span>UNVERIFIED</span>
+      <span class="chip verified"><span class="dot"></span>VERIFIED</span>
+      <span class="chip progress"><span class="dot"></span>IN&nbsp;PROGRESS</span>
+      <span class="chip resolved"><span class="dot"></span>RESOLVED</span>
+      <span class="chip critical"><span class="dot"></span>CRITICAL</span>
+    </div>
+    <p class="note">Status is shown as a left-border tag with a monospace code — like a shipping manifest, not a pastel rounded pill. No drop shadows, no gradients.</p>
+  </section>
+
+  <section class="block">
+    <h2 class="section-title">04 — Buttons</h2>
+    <div class="btn-row">
+      <button class="btn btn-primary">Claim this request</button>
+      <button class="btn btn-secondary">View details</button>
+      <button class="btn btn-danger">Mark unresolved</button>
+      <button class="btn btn-ghost">Cancel</button>
+    </div>
+    <p class="note">Buttons state the action in plain active voice — "Claim this request," not "Submit." Minimal corner radius (3px). No arrow suffixes.</p>
+  </section>
+
+  <section class="block">
+    <h2 class="section-title">05 — Request Lifecycle (genuine sequence — numbering earned here)</h2>
+    <div class="stages">
+      <div class="stage"><div class="num">01</div><div class="label">Unverified</div></div>
+      <div class="stage active"><div class="num">02</div><div class="label">Verified</div></div>
+      <div class="stage"><div class="num">03</div><div class="label">In Progress</div></div>
+      <div class="stage"><div class="num">04</div><div class="label">Resolved</div></div>
+      <div class="stage"><div class="num">05</div><div class="label">Closed</div></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2 class="section-title">06 — Dispatch Log (primary list pattern)</h2>
+    <div class="log">
+      <div class="log-row">
+        <span class="rid">#4821</span>
+        <span class="desc"><span class="cat">Medical</span>Elderly resident needs insulin, unable to travel</span>
+        <span class="chip critical" style="justify-self:start"><span class="dot"></span>CRITICAL</span>
+        <span class="time">2 min ago</span>
+      </div>
+      <div class="log-row">
+        <span class="rid">#4819</span>
+        <span class="desc"><span class="cat">Shelter</span>Family of five displaced by flooding, Sector 4</span>
+        <span class="chip progress" style="justify-self:start"><span class="dot"></span>IN PROGRESS</span>
+        <span class="time">14 min ago</span>
+      </div>
+      <div class="log-row">
+        <span class="rid">#4815</span>
+        <span class="desc"><span class="cat">Supplies</span>Drinking water needed for 12 households</span>
+        <span class="chip verified" style="justify-self:start"><span class="dot"></span>VERIFIED</span>
+        <span class="time">31 min ago</span>
+      </div>
+    </div>
+    <p class="note">Rows, not cards. No shadows, no rounded thumbnails. Density and scanability matter more than visual flourish — this is read under pressure.</p>
+  </section>
+
+  <section class="block">
+    <h2 class="section-title">07 — Console Layout (map + rail)</h2>
+    <div class="console">
+      <div class="rail">
+        <div class="rail-head">Open Requests · Sector 4</div>
+      </div>
+      <div class="map">
+        <div class="pin rust" style="top:40%;left:30%;"></div>
+        <div class="pin amber" style="top:60%;left:55%;"></div>
+        <div class="pin teal" style="top:25%;left:68%;"></div>
+      </div>
+    </div>
+    <p class="note">The map is a primary surface, not an accessory widget — this is fundamentally a geography problem. Pin color always maps to the same status colors as the chips.</p>
+  </section>
+
+  <section class="block">
+    <h2 class="section-title">08 — Principles</h2>
+    <div class="principles">
+      <div class="principle"><h3>Calm under load</h3><p>No neon, no gradients, no urgency-by-decoration. Color is reserved for meaning, so it stays trustworthy when it matters.</p></div>
+      <div class="principle"><h3>Data is not decoration</h3><p>Monospace, hairline borders, and left-border status tags exist because this is genuinely operational data, not because they look technical.</p></div>
+      <div class="principle"><h3>Plain, active language</h3><p>"Claim this request," "Mark resolved," "No open requests here yet." No jargon, no filler, one job per label.</p></div>
+      <div class="principle"><h3>One board, five roles</h3><p>Every role reads the same log and map with a different rail of actions — never five disconnected-looking apps.</p></div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

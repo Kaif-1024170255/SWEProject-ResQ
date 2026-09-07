@@ -1,0 +1,47 @@
+@import 'leaflet/dist/leaflet.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #14213D;
+  --ink-soft: #2B3350;
+  --paper: #EEF0EE;
+  --paper-raised: #FFFFFF;
+  --slate: #5B6670;
+  --slate-line: #D8DCD8;
+  --amber: #D98E2B;
+  --amber-bg: #FBEEDA;
+  --teal: #1F7A6C;
+  --teal-bg: #E1F0EC;
+  --rust: #B23A2F;
+  --rust-bg: #F8E4E1;
+  --text: #20242B;
+}
+
+body {
+  margin: 0;
+  background-color: var(--paper);
+  color: var(--text);
+  font-family: 'Public Sans', sans-serif;
+  line-height: 1.5;
+}
+
+/* Custom Leaflet styling per DESIGN_SYSTEM.md */
+.leaflet-popup-content-wrapper {
+  background: var(--paper-raised);
+  color: var(--text);
+  border-radius: 3px;
+  box-shadow: 0 4px 14px rgba(20, 33, 61, 0.12);
+  border: 1px solid var(--slate-line);
+  padding: 0;
+}
+.leaflet-popup-content {
+  margin: 0;
+  line-height: 1.5;
+}
+.leaflet-popup-tip {
+  background: var(--paper-raised);
+  border: 1px solid var(--slate-line);
+}

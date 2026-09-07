@@ -1,0 +1,67 @@
+name: resQ CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  backend:
+    name: Backend Lint, Build & Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type-check & lint
+        run: npm run lint
+
+      - name: Build server bundle
+        run: npm run build
+
+      - name: Run test suite (Vitest + Supertest)
+        env:
+          JWT_SECRET: ci-test-secret-never-used-in-prod
+        run: npm test
+
+  frontend:
+    name: Frontend Lint & Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type-check & lint
+        run: npm run lint
+
+      - name: Build client production bundle
+        run: npm run build
