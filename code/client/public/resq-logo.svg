@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="7" fill="#0f172a"/>
+  <!-- Circular rescue badge forming the body of Q -->
+  <circle cx="15" cy="14" r="9.5" fill="#dc2626"/>
+  <!-- Crisp white emergency rescue cross -->
+  <rect x="13.25" y="8" width="3.5" height="12" rx="0.75" fill="#ffffff"/>
+  <rect x="9" y="12.25" width="12" height="3.5" rx="0.75" fill="#ffffff"/>
+  <!-- Stylized leg completing the 'Q' -->
+  <path d="M19 18 L25.5 24.5" stroke="#dc2626" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M19 18 L25 24" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
