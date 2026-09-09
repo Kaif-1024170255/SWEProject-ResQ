@@ -172,7 +172,7 @@ Existing ad hoc approaches to local emergency coordination, such as phone calls,
 For the mid-semester evaluation, the project focuses on a demonstrable core that establishes the coordination model and the security/privacy foundations needed for later real-time features.
 
 \begin{enumerate}
-\item Implement a server-enforced five-stage request lifecycle: Unverified $\rightarrow$ Verified $\rightarrow$ In Progress $\rightarrow$ Resolved $\rightarrow$ Closed, with role-based authorization at every transition.
+\item Implement a server-enforced five-stage request lifecycle: Unverified, Verified, In Progress, Resolved, Closed, with role-based authorization at every transition.
 \item Build a unified map-and-log dispatch console that can be used by the five project roles from one codebase, with the available actions adapting to the logged-in role.
 \item Protect affected-person location and contact privacy through coordinate fuzzing and authorization-aware response redaction.
 \item Provide public emergency submission and request tracking without requiring an account for the initial report, while maintaining a free/open-source or free-tier technology stack.
@@ -212,16 +212,18 @@ Future real-time layer & Socket.IO & Planned cross-dashboard state propagation\\
 \bottomrule
 \end{tabularx}
 \renewcommand{\arraystretch}{1}
-
+\newpage
 \subsection{2.2\quad UML Diagrams}
 
 The UML models below describe the current ResQ prototype. The Use Case diagram includes explicit \texttt{<<include>>} and \texttt{<<extend>>} relationships, while the Class, Sequence, and Activity diagrams are aligned with the same roles, request lifecycle, and privacy-aware architecture.
 
-\newpage
+
 
 % ============================================================
 % USE CASE
 % ============================================================
+
+
 \subsubsection{2.2.1\quad Use Case Diagram}
 \begin{figure}[H]
 \centering
@@ -237,7 +239,7 @@ The UML models below describe the current ResQ prototype. The Use Case diagram i
 \subsubsection{2.2.2\quad Class Diagram}
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.88\textwidth,height=9.0in,keepaspectratio]{images/class_diagram.png}
+\includegraphics[width=0.88\textwidth,height=9.0in,keepaspectratio]{images/class.png}
 \caption{ResQ class diagram}
 \end{figure}
 
@@ -249,7 +251,7 @@ The UML models below describe the current ResQ prototype. The Use Case diagram i
 \subsubsection{2.2.3\quad Sequence Diagram}
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.88\textwidth,height=9.0in,keepaspectratio]{images/sequence_diagram.png}
+\includegraphics[width=0.88\textwidth,height=9.0in,keepaspectratio]{images/sequence-diagram.png}
 \caption{Request submission, retrieval, and responder claim sequence.}
 \end{figure}
 
