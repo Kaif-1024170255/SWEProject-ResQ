@@ -1,7 +1,6 @@
 # ResQ Project Journal --- Kaif Ahmad
 
 **Role:** Backend Development / Technical Integration\
-**Duration:** 4 Weeks
 
 ## Week 1 --- Backend Architecture
 
@@ -42,3 +41,10 @@
     authorization, and privacy behavior.
 -   Coordinated final backend fixes and helped prepare the working
     prototype for demonstration.
+
+-   Integrated the completed frontend workflows with the backend.
+-   Tested request submission, tracking, login, and role-based dashboard
+    views.
+-   Fixed frontend validation and display issues.
+-   Helped prepare the final prototype and presentation flow.
+

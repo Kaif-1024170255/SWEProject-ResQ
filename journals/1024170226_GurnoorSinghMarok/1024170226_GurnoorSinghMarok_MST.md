@@ -19,7 +19,7 @@
     using sample data.
 -   Coordinated with Tamanna on database/model changes.
 
-## Week 3 --- Request Workflow and Integration
+## Week 3 --- Request Workflow and Integration, Dashboard and Map UI
 
 -   Assisted with request verification, claiming, resolution, and
     confirmation workflows.
@@ -27,6 +27,12 @@
 -   Tested different user roles and checked that protected operations
     behaved correctly.
 -   Helped identify and report lifecycle and validation issues.
+
+-   Worked on the responder/admin dashboard layout.
+-   Added the request list, filters, status indicators, and map area.
+-   Connected frontend screens with the backend APIs as they became
+    available.
+-   Fixed UI issues and adjusted the layout for different screen sizes.
 
 ## Week 4 --- Testing, Debugging, and Documentation
 
