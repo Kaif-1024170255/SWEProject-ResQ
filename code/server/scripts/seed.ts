@@ -16,11 +16,32 @@ async function runSeed() {
     await mongoose.connect(uri);
     console.log('Connected. Running database seed...');
 
-    const { users, requests } = await seedDatabase();
+    const {
+      users,
+      requests,
+      organizations = [],
+      resources = [],
+      inventories = [],
+      verifications = [],
+      categories = [],
+      notifications = [],
+      messages = [],
+      evidence = [],
+      incidents = [],
+    } = await seedDatabase();
 
     console.log(`\nSuccessfully seeded:`);
     console.log(` • ${users.length} users (Admin, Volunteer, Affected Person, NGO, Resource Provider)`);
     console.log(` • ${requests.length} realistic requests across all categories and statuses`);
+    console.log(` • ${organizations.length} organizations (NGO, Supplier, Hospital, Government, Community Group)`);
+    console.log(` • ${categories.length} custom and default emergency categories`);
+    console.log(` • ${resources.length} registered resources`);
+    console.log(` • ${inventories.length} resource inventory records`);
+    console.log(` • ${verifications.length} verified inspection records`);
+    console.log(` • ${notifications.length} in-app notifications`);
+    console.log(` • ${messages.length} request communication messages`);
+    console.log(` • ${evidence.length} supporting evidence attachments`);
+    console.log(` • ${incidents.length} major emergency incident groupings`);
 
     console.log('\nDemo User Credentials:');
     users.forEach((u) => {

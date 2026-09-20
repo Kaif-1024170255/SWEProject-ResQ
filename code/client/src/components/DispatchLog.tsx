@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import StatusChip from './StatusChip';
+import { VerificationModal } from './VerificationModal';
+import { VerificationAuditRecord } from './VerificationAuditRecord';
+import RequestCommsLog from './RequestCommsLog';
+import SuggestedMatchesPanel from './SuggestedMatchesPanel';
 
 export interface DispatchRequest {
   _id: string;
@@ -13,7 +17,7 @@ export interface DispatchRequest {
     preciseLat?: number;
     preciseLng?: number;
   };
-  status: 'unverified' | 'verified' | 'in_progress' | 'resolved' | 'closed';
+  status: 'unverified' | 'verified' | 'in_progress' | 'resolved' | 'closed' | 'cancelled';
   contactPhone?: string;
   createdBy?: {
     _id: string;
@@ -24,6 +28,11 @@ export interface DispatchRequest {
     _id: string;
     name: string;
     role: string;
+  };
+  claimedOrg?: string | {
+    _id: string;
+    name: string;
+    isVerified?: boolean;
   };
   statusHistory?: Array<{
     status: string;
@@ -58,6 +67,7 @@ export default function DispatchLog({ requests, onRefresh, isLoading }: Dispatch
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [verifyingRequest, setVerifyingRequest] = useState<DispatchRequest | null>(null);
 
   const filteredRequests = requests.filter((req) => {
     const statusMatch =
@@ -67,25 +77,10 @@ export default function DispatchLog({ requests, onRefresh, isLoading }: Dispatch
     return statusMatch && categoryMatch;
   });
 
-  const handleVerify = async (id: string) => {
-    setActionError(null);
-    setProcessingId(id);
-    try {
-      const res = await fetch(`/api/requests/${id}/verify`, {
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ note: 'Verified by central dispatcher' }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to verify request');
-      onRefresh();
-    } catch (err: unknown) {
-      setActionError(err instanceof Error ? err.message : 'Error executing verify');
-    } finally {
-      setProcessingId(null);
+  const handleVerify = (id: string) => {
+    const target = requests.find((r) => r.requestId === id);
+    if (target) {
+      setVerifyingRequest(target);
     }
   };
 
@@ -135,8 +130,7 @@ export default function DispatchLog({ requests, onRefresh, isLoading }: Dispatch
 
   const isResponder =
     user?.role === 'volunteer' ||
-    user?.role === 'ngo' ||
-    user?.role === 'resource_provider';
+    user?.role === 'ngo';
   const isAdmin = user?.role === 'admin';
 
   return (
@@ -152,7 +146,7 @@ export default function DispatchLog({ requests, onRefresh, isLoading }: Dispatch
       <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-slate-line">
         <div className="flex flex-wrap items-center gap-1.5 text-xs font-mono">
           <span className="text-slate uppercase mr-1">Status:</span>
-          {['all', 'unverified', 'verified', 'in_progress', 'resolved', 'closed'].map((status) => (
+          {['all', 'unverified', 'verified', 'in_progress', 'resolved', 'closed', 'cancelled'].map((status) => (
             <button
               key={status}
               onClick={() => setActiveStatusFilter(status)}
@@ -208,6 +202,16 @@ export default function DispatchLog({ requests, onRefresh, isLoading }: Dispatch
             {filteredRequests.map((req) => {
               const isClaimant =
                 user && req.claimedBy && req.claimedBy._id === user.id;
+              const reqOrgId =
+                typeof req.claimedOrg === 'object' ? req.claimedOrg?._id : req.claimedOrg;
+              const isOrgTeammate = Boolean(
+                user &&
+                user.role === 'ngo' &&
+                user.organizationId &&
+                reqOrgId &&
+                reqOrgId === user.organizationId
+              );
+              const canVerify = isAdmin || (user?.role === 'ngo' && Boolean(user.organizationId));
               const isExpanded = selectedRequestId === req.requestId;
               const isBusy = processingId === req.requestId;
 
@@ -254,14 +258,20 @@ export default function DispatchLog({ requests, onRefresh, isLoading }: Dispatch
                       </span>
 
                       {/* Action buttons based on status and role */}
-                      {req.status === 'unverified' && isAdmin && (
-                        <button
-                          onClick={() => handleVerify(req.requestId)}
-                          disabled={isBusy}
-                          className="bg-ink text-white font-sans text-xs font-semibold px-3 py-1.5 rounded-[3px] hover:bg-ink-soft cursor-pointer disabled:opacity-50"
-                        >
-                          {isBusy ? 'Verifying...' : 'Verify'}
-                        </button>
+                      {req.status === 'unverified' && canVerify && (
+                        user && req.createdBy && req.createdBy._id === user.id ? (
+                          <span className="font-mono text-[11px] text-slate italic" title="Responders cannot verify their own submissions">
+                            Own submission
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleVerify(req.requestId)}
+                            disabled={isBusy}
+                            className="bg-ink text-white font-sans text-xs font-semibold px-3 py-1.5 rounded-[3px] hover:bg-ink-soft cursor-pointer disabled:opacity-50"
+                          >
+                            {isBusy ? 'Verifying...' : 'Verify'}
+                          </button>
+                        )
                       )}
 
                       {req.status === 'verified' && isResponder && (
@@ -274,7 +284,7 @@ export default function DispatchLog({ requests, onRefresh, isLoading }: Dispatch
                         </button>
                       )}
 
-                      {req.status === 'in_progress' && (isClaimant || isAdmin) && (
+                      {req.status === 'in_progress' && (isClaimant || isAdmin || isOrgTeammate) && (
                         <button
                           onClick={() => handleResolve(req.requestId)}
                           disabled={isBusy}
@@ -343,6 +353,20 @@ export default function DispatchLog({ requests, onRefresh, isLoading }: Dispatch
                         </div>
                       </div>
 
+                      {/* Verification Audit Record */}
+                      {req.status !== 'unverified' && (
+                        <div className="pt-2 border-t border-slate-line">
+                          <VerificationAuditRecord requestId={req.requestId} />
+                        </div>
+                      )}
+
+                      {/* Rule-Based Suggested Matches Engine */}
+                      {(isAdmin || user?.role === 'ngo') && req.status !== 'closed' && req.status !== 'cancelled' && (
+                        <div className="pt-2 border-t border-slate-line">
+                          <SuggestedMatchesPanel requestId={req.requestId} />
+                        </div>
+                      )}
+
                       {/* Status History Timeline */}
                       {req.statusHistory && req.statusHistory.length > 0 && (
                         <div className="pt-2 border-t border-slate-line">
@@ -365,6 +389,16 @@ export default function DispatchLog({ requests, onRefresh, isLoading }: Dispatch
                           </div>
                         </div>
                       )}
+
+                      {/* Communications & Triage Thread */}
+                      <div className="pt-2 border-t border-slate-line">
+                        <RequestCommsLog
+                          requestId={req.requestId}
+                          requestStatus={req.status}
+                          defaultContactPhone={req.contactPhone}
+                          requestCreatedById={req.createdBy?._id}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -373,6 +407,17 @@ export default function DispatchLog({ requests, onRefresh, isLoading }: Dispatch
           </div>
         )}
       </div>
+
+      {verifyingRequest && (
+        <VerificationModal
+          requestId={verifyingRequest.requestId}
+          category={verifyingRequest.category}
+          description={verifyingRequest.description}
+          isOpen={true}
+          onClose={() => setVerifyingRequest(null)}
+          onSuccess={() => onRefresh()}
+        />
+      )}
     </div>
   );
 }

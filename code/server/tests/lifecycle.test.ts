@@ -210,16 +210,46 @@ describe('Emergency Request Lifecycle Endpoints', () => {
       .patch(`/api/requests/${reqDoc.requestId}/verify`)
       .set('Authorization', `Bearer ${adminToken}`);
 
-    // 2. Affected person cannot claim (volunteer/ngo/resource_provider only)
+    // 2. Affected person cannot claim (volunteer/ngo only)
     const affClaim = await request(app)
       .patch(`/api/requests/${reqDoc.requestId}/claim`)
       .set('Authorization', `Bearer ${affectedPersonToken}`);
     expect(affClaim.status).toBe(403);
 
-    // Volunteer claims it to move to in_progress
-    await request(app)
+    // Resource provider cannot claim (restricted to volunteer and ngo)
+    const providerUser = await User.create({
+      name: 'Warehouse Provider',
+      email: 'provider.claim@resq.org',
+      passwordHash: 'hash',
+      role: 'resource_provider',
+    });
+    const providerToken = jwt.sign(
+      { userId: providerUser._id.toString(), role: 'resource_provider' },
+      TEST_JWT_SECRET
+    );
+    const provClaim = await request(app)
       .patch(`/api/requests/${reqDoc.requestId}/claim`)
-      .set('Authorization', `Bearer ${volunteerToken}`);
+      .set('Authorization', `Bearer ${providerToken}`);
+    expect(provClaim.status).toBe(403);
+    expect(provClaim.body.error).toMatch(/Access forbidden/i);
+
+    // NGO CAN claim verified requests
+    const ngoUser = await User.create({
+      name: 'Relief NGO Team',
+      email: 'ngo.claim@resq.org',
+      passwordHash: 'hash',
+      role: 'ngo',
+    });
+    const ngoToken = jwt.sign(
+      { userId: ngoUser._id.toString(), role: 'ngo' },
+      TEST_JWT_SECRET
+    );
+    const ngoClaim = await request(app)
+      .patch(`/api/requests/${reqDoc.requestId}/claim`)
+      .set('Authorization', `Bearer ${ngoToken}`);
+    expect(ngoClaim.status).toBe(200);
+    expect(ngoClaim.body.request.status).toBe('in_progress');
+    expect(ngoClaim.body.request.claimedBy._id).toBe(ngoUser._id.toString());
 
     // 3. Unrelated volunteer cannot resolve a request claimed by another volunteer
     const otherVolResolve = await request(app)

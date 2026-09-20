@@ -1,1 +1,40 @@
 .Notes.md
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment files & secrets
+.env
+.env.*
+*.env
+*.env.local
+
+# Build outputs
+dist/
+build/
+**/dist/
+**/build/
+*.tsbuildinfo
+
+# Uploads & temporary media
+uploads/
+**/uploads/
+!**/uploads/.gitkeep
+
+# Playwright & test reports
+test-results/
+**/test-results/
+playwright-report/
+**/playwright-report/
+blob-report/
+**/blob-report/
+coverage/
+**/coverage/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.sw?

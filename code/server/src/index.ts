@@ -1,9 +1,11 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+import http from 'http';
 import mongoose from 'mongoose';
 import app from './app';
 import { seedDatabase } from './seed';
+import { initSocketIO } from './socket';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
 
@@ -36,8 +38,15 @@ async function startServer(): Promise<void> {
     console.log('[resQ Server] Successfully connected to remote MongoDB.');
   }
 
-  app.listen(PORT, () => {
+  // Create HTTP server wrapping Express application
+  const httpServer = http.createServer(app);
+
+  // Initialize self-hosted Socket.IO real-time engine
+  initSocketIO(httpServer);
+
+  httpServer.listen(PORT, () => {
     console.log(`[resQ Server] Running on http://localhost:${PORT}`);
+    console.log(`[resQ Server] Socket.IO real-time engine attached and active.`);
   });
 }
 

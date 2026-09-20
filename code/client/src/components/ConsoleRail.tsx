@@ -45,8 +45,7 @@ export default function ConsoleRail({
   const isAdmin = user?.role === 'admin';
   const isResponder =
     user?.role === 'volunteer' ||
-    user?.role === 'ngo' ||
-    user?.role === 'resource_provider';
+    user?.role === 'ngo';
 
   return (
     <div className="flex flex-col h-full border-r border-slate-line bg-paper-raised overflow-hidden">
@@ -154,14 +153,20 @@ export default function ConsoleRail({
 
                   <div onClick={(e) => e.stopPropagation()}>
                     {req.status === 'unverified' && isAdmin && (
-                      <button
-                        type="button"
-                        onClick={() => onAction(req.requestId, 'verify')}
-                        disabled={isBusy}
-                        className="bg-ink text-white font-sans text-xs font-semibold px-2.5 py-1 rounded-[3px] hover:bg-ink-soft cursor-pointer disabled:opacity-50"
-                      >
-                        {isBusy ? '...' : 'Verify'}
-                      </button>
+                      user && req.createdBy && req.createdBy._id === user.id ? (
+                        <span className="font-mono text-[10px] text-slate italic px-1" title="Cannot verify own submission">
+                          Own
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => onAction(req.requestId, 'verify')}
+                          disabled={isBusy}
+                          className="bg-ink text-white font-sans text-xs font-semibold px-2.5 py-1 rounded-[3px] hover:bg-ink-soft cursor-pointer disabled:opacity-50"
+                        >
+                          {isBusy ? '...' : 'Verify'}
+                        </button>
+                      )
                     )}
 
                     {req.status === 'verified' && isResponder && (

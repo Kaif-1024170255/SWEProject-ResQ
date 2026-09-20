@@ -49,32 +49,46 @@ function MapController({
 
   // Auto-fit bounds on initial load if requests exist
   useEffect(() => {
-    if (!initialFitDone.current && allRequests.length > 0) {
-      const validCoords = allRequests
-        .map((r) => {
-          const lat = r.location.preciseLat ?? r.location.publicLat;
-          const lng = r.location.preciseLng ?? r.location.publicLng;
-          return [lat, lng] as [number, number];
-        })
-        .filter(([lat, lng]) => !isNaN(lat) && !isNaN(lng));
+    if (!initialFitDone.current && allRequests.length > 0 && map) {
+      try {
+        const validCoords = allRequests
+          .map((r) => {
+            if (!r || !r.location) return null;
+            const lat = r.location.preciseLat ?? r.location.publicLat;
+            const lng = r.location.preciseLng ?? r.location.publicLng;
+            if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) return null;
+            return [lat, lng] as [number, number];
+          })
+          .filter((coord): coord is [number, number] => coord !== null);
 
-      if (validCoords.length > 0) {
-        const bounds = L.latLngBounds(validCoords);
-        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
-        initialFitDone.current = true;
+        if (validCoords.length > 0) {
+          const bounds = L.latLngBounds(validCoords);
+          if (bounds.isValid()) {
+            map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+            initialFitDone.current = true;
+          }
+        }
+      } catch (err) {
+        console.warn('Map initial fitBounds warning:', err);
       }
     }
   }, [allRequests, map]);
 
   // Pan to selected request when chosen from rail
   useEffect(() => {
-    if (selectedRequest) {
-      const lat = selectedRequest.location.preciseLat ?? selectedRequest.location.publicLat;
-      const lng = selectedRequest.location.preciseLng ?? selectedRequest.location.publicLng;
-      if (!isNaN(lat) && !isNaN(lng)) {
-        map.flyTo([lat, lng], Math.max(map.getZoom(), 13), {
-          duration: 0.7,
-        });
+    if (selectedRequest && selectedRequest.location && map) {
+      try {
+        const lat = selectedRequest.location.preciseLat ?? selectedRequest.location.publicLat;
+        const lng = selectedRequest.location.preciseLng ?? selectedRequest.location.publicLng;
+        if (lat != null && lng != null && !isNaN(lat) && !isNaN(lng)) {
+          const currentZoom = typeof map.getZoom === 'function' ? map.getZoom() : 13;
+          const targetZoom = typeof currentZoom === 'number' && !isNaN(currentZoom) ? Math.max(currentZoom, 13) : 13;
+          map.flyTo([lat, lng], targetZoom, {
+            duration: 0.7,
+          });
+        }
+      } catch (err) {
+        console.warn('Map flyTo warning:', err);
       }
     }
   }, [selectedRequest, map]);
@@ -151,22 +165,14 @@ export default function ConsoleMap({
 
           return (
             <Marker
-              key={req._id}
+              key={req._id || req.requestId}
               position={[lat, lng]}
               icon={icon}
               eventHandlers={{
                 click: () => onSelectRequest(req.requestId),
               }}
             >
-              <Popup
-                eventHandlers={{
-                  remove: () => {
-                    if (selectedRequestId === req.requestId) {
-                      onSelectRequest(null);
-                    }
-                  },
-                }}
-              >
+              <Popup>
                 <div className="p-3 w-[260px] sm:w-[280px] font-sans space-y-2.5">
                   <div className="flex items-center justify-between border-b border-slate-line pb-1.5">
                     <span className="font-mono text-xs font-bold text-ink">
@@ -186,10 +192,10 @@ export default function ConsoleMap({
                   </p>
 
                   {/* Revealing coordinates & phone for authorized users */}
-                  {req.location.preciseLat !== undefined ? (
+                  {req.location && req.location.preciseLat != null && !isNaN(Number(req.location.preciseLat)) ? (
                     <div className="p-1.5 bg-paper border border-slate-line font-mono text-[10px] space-y-0.5">
                       <div className="text-rust font-semibold">
-                        GPS: {req.location.preciseLat.toFixed(6)}, {req.location.preciseLng?.toFixed(6)}
+                        GPS: {Number(req.location.preciseLat).toFixed(6)}, {Number(req.location.preciseLng ?? 0).toFixed(6)}
                       </div>
                       {req.contactPhone && (
                         <div className="text-ink">Phone: {req.contactPhone}</div>

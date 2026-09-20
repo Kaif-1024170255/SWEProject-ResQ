@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { connectSocket } from '../services/socket';
 
 export type UserRole =
   | 'affected_person'
@@ -12,6 +13,7 @@ export interface AuthUser {
   name: string;
   email: string;
   role: UserRole;
+  organizationId?: string;
 }
 
 interface AuthContextType {
@@ -79,11 +81,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [token]);
 
+  // Synchronize Socket.IO connection with authentication state once loaded
+  useEffect(() => {
+    if (!isLoading) {
+      connectSocket(token);
+    }
+  }, [isLoading, token]);
+
   const login = (newToken: string, newUser: AuthUser) => {
     localStorage.setItem(TOKEN_KEY, newToken);
     localStorage.setItem(USER_KEY, JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
+    connectSocket(newToken);
   };
 
   const logout = () => {
@@ -91,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(USER_KEY);
     setToken(null);
     setUser(null);
+    connectSocket(null);
   };
 
   return (

@@ -1,4 +1,4 @@
-import { Schema, model, Document, Types } from 'mongoose';
+import mongoose, { Schema, model, Document, Types } from 'mongoose';
 
 export type RequestCategory =
   | 'medical'
@@ -20,7 +20,8 @@ export type RequestStatus =
   | 'verified'
   | 'in_progress'
   | 'resolved'
-  | 'closed';
+  | 'closed'
+  | 'cancelled';
 
 export const REQUEST_STATUSES: RequestStatus[] = [
   'unverified',
@@ -28,6 +29,7 @@ export const REQUEST_STATUSES: RequestStatus[] = [
   'in_progress',
   'resolved',
   'closed',
+  'cancelled',
 ];
 
 export interface ILocation {
@@ -35,6 +37,7 @@ export interface ILocation {
   preciseLng: number;
   publicLat: number;
   publicLng: number;
+  address?: string;
 }
 
 export interface IStatusHistoryEntry {
@@ -47,12 +50,15 @@ export interface IStatusHistoryEntry {
 export interface IRequest extends Document {
   requestId: string;
   category: RequestCategory;
+  categoryRef?: Types.ObjectId;
+  incidentId?: Types.ObjectId;
   description: string;
   location: ILocation;
   status: RequestStatus;
   createdBy?: Types.ObjectId;
   contactPhone?: string;
   claimedBy?: Types.ObjectId;
+  claimedOrg?: Types.ObjectId;
   statusHistory: IStatusHistoryEntry[];
   createdAt: Date;
   updatedAt: Date;
@@ -117,6 +123,11 @@ const locationSchema = new Schema<ILocation>(
       type: Number,
       required: [true, 'Public longitude is required'],
     },
+    address: {
+      type: String,
+      trim: true,
+      required: false,
+    },
   },
   { _id: false }
 );
@@ -157,11 +168,32 @@ const requestSchema = new Schema<IRequest>(
     },
     category: {
       type: String,
-      enum: {
-        values: REQUEST_CATEGORIES,
+      required: [true, 'Category is required'],
+      trim: true,
+      lowercase: true,
+      validate: {
+        validator: async function (value: string) {
+          if (REQUEST_CATEGORIES.includes(value as any)) return true;
+          try {
+            const found = await mongoose.model('EmergencyCategory').findOne({ name: value, isActive: true });
+            return !!found;
+          } catch {
+            return false;
+          }
+        },
         message: '{VALUE} is not a valid request category',
       },
-      required: [true, 'Category is required'],
+    },
+    categoryRef: {
+      type: Schema.Types.ObjectId,
+      ref: 'EmergencyCategory',
+      default: undefined,
+    },
+    incidentId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Incident',
+      default: undefined,
+      index: true,
     },
     description: {
       type: String,
@@ -194,6 +226,12 @@ const requestSchema = new Schema<IRequest>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: false,
+    },
+    claimedOrg: {
+      type: Schema.Types.ObjectId,
+      ref: 'Organization',
+      required: false,
+      index: true,
     },
     statusHistory: {
       type: [statusHistorySchema],

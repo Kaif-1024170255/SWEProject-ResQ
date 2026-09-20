@@ -1,0 +1,517 @@
+{
+  "exportMetadata": {
+    "title": "ResQ Pilot Validation Live Session Export",
+    "exportedAt": "2026-09-20T07:09:46.049Z",
+    "totalRequests": 4,
+    "totalAssignments": 4,
+    "totalVerifications": 4,
+    "totalNotifications": 4,
+    "totalMessages": 2
+  },
+  "analyticsSnapshot": {
+    "timeRange": "24h",
+    "generatedAt": "2026-09-20T07:09:46.049Z",
+    "timeToMatch": {
+      "medianMinutes": 1,
+      "meanMinutes": 1,
+      "minMinutes": 1,
+      "maxMinutes": 1,
+      "totalEvaluated": 4,
+      "dailyTrend": [
+        {
+          "date": "2026-09-20",
+          "label": "Sep 20",
+          "medianMinutes": 1,
+          "count": 4
+        }
+      ]
+    },
+    "doubleBookingRate": {
+      "conflictCount": 0,
+      "totalEvaluated": 0,
+      "ratePercentage": 0,
+      "status": "INTEGRITY_VERIFIED",
+      "detail": "0 conflicts across 0 active assignments and inventories (concurrency safe)"
+    },
+    "confirmationRate": {
+      "totalResolved": 4,
+      "confirmedClosed": 1,
+      "pendingConfirmation": 3,
+      "ratePercentage": 25
+    },
+    "propagationLatency": {
+      "medianMs": 23,
+      "p95Ms": 29,
+      "minMs": 15,
+      "maxMs": 29,
+      "sampleCount": 8,
+      "lastRecordedAt": "2026-09-20T07:09:46.049Z",
+      "status": "active"
+    }
+  },
+  "collections": {
+    "requests": [
+      {
+        "_id": "6aaf7f6ce304cc9e92e54760",
+        "category": "medical",
+        "categoryRef": "6aaf7d63a82968dbb8282f34",
+        "description": "Paracetamol",
+        "location": {
+          "preciseLat": 30.351742,
+          "preciseLng": 76.362467,
+          "publicLat": 30.349318,
+          "publicLng": 76.365286
+        },
+        "status": "resolved",
+        "createdBy": "6aaf7d63a82968dbb8282f3c",
+        "statusHistory": [
+          {
+            "status": "unverified",
+            "changedAt": "2026-09-20T06:38:36.515Z",
+            "changedBy": "6aaf7d63a82968dbb8282f3c",
+            "note": "Initial request submission"
+          },
+          {
+            "status": "verified",
+            "changedAt": "2026-09-20T06:39:12.019Z",
+            "changedBy": "6aaf7d63a82968dbb8282f40",
+            "note": "Request verified by administrator"
+          },
+          {
+            "status": "in_progress",
+            "changedAt": "2026-09-20T06:39:19.473Z",
+            "changedBy": "6aaf7d63a82968dbb8282f3d",
+            "note": "Claimed by Rahul Sharma"
+          },
+          {
+            "status": "resolved",
+            "changedAt": "2026-09-20T06:41:26.338Z",
+            "changedBy": "6aaf7d63a82968dbb8282f40",
+            "note": "Resolution reported by Central Dispatch Admin"
+          }
+        ],
+        "requestId": "REQ-2026-382977",
+        "createdAt": "2026-09-20T06:38:36.519Z",
+        "updatedAt": "2026-09-20T06:41:26.339Z",
+        "__v": 3,
+        "claimedBy": "6aaf7d63a82968dbb8282f3d"
+      },
+      {
+        "_id": "6aaf8334e304cc9e92e54768",
+        "category": "medical",
+        "categoryRef": "6aaf7d63a82968dbb8282f34",
+        "description": "Elderly cardiac patient requires urgent insulin and medication",
+        "location": {
+          "preciseLat": 30.901,
+          "preciseLng": 75.8573,
+          "publicLat": 30.897599,
+          "publicLng": 75.857227
+        },
+        "status": "closed",
+        "contactPhone": "9876512345",
+        "statusHistory": [
+          {
+            "status": "unverified",
+            "changedAt": "2026-09-20T06:54:44.959Z",
+            "note": "Initial request submission"
+          },
+          {
+            "status": "verified",
+            "changedAt": "2026-09-20T06:56:00.878Z",
+            "changedBy": "6aaf7d63a82968dbb8282f40",
+            "note": "Request verified by administrator"
+          },
+          {
+            "status": "in_progress",
+            "changedAt": "2026-09-20T06:57:16.703Z",
+            "changedBy": "6aaf7d63a82968dbb8282f3d",
+            "note": "Claimed by Rahul Sharma"
+          },
+          {
+            "status": "resolved",
+            "changedAt": "2026-09-20T06:57:58.372Z",
+            "changedBy": "6aaf7d63a82968dbb8282f3d",
+            "note": "Resolution reported by Rahul Sharma"
+          },
+          {
+            "status": "closed",
+            "changedAt": "2026-09-20T06:59:33.101Z",
+            "changedBy": "6aaf7d63a82968dbb8282f3d",
+            "note": "Resolution verified by requester"
+          }
+        ],
+        "requestId": "REQ-2026-535413",
+        "createdAt": "2026-09-20T06:54:44.960Z",
+        "updatedAt": "2026-09-20T06:59:33.102Z",
+        "__v": 4,
+        "claimedBy": "6aaf7d63a82968dbb8282f3d"
+      },
+      {
+        "_id": "6aaf84cbe304cc9e92e5476d",
+        "category": "supplies",
+        "categoryRef": "6aaf7d63a82968dbb8282f36",
+        "description": "Clean Drinking Water for 15 houses",
+        "location": {
+          "preciseLat": 30.35174,
+          "preciseLng": 76.362433,
+          "publicLat": 30.349755,
+          "publicLng": 76.365062
+        },
+        "status": "resolved",
+        "contactPhone": "9876512345",
+        "statusHistory": [
+          {
+            "status": "unverified",
+            "changedAt": "2026-09-20T07:01:31.512Z",
+            "note": "Initial request submission"
+          },
+          {
+            "status": "verified",
+            "changedAt": "2026-09-20T07:02:40.809Z",
+            "changedBy": "6aaf7d63a82968dbb8282f40",
+            "note": "Request verified by administrator"
+          },
+          {
+            "status": "in_progress",
+            "changedAt": "2026-09-20T07:03:27.546Z",
+            "changedBy": "6aaf7d63a82968dbb8282f3e",
+            "note": "Claimed by Punjab Relief Network"
+          },
+          {
+            "status": "resolved",
+            "changedAt": "2026-09-20T07:04:43.593Z",
+            "changedBy": "6aaf7d63a82968dbb8282f3e",
+            "note": "Resolution reported by Punjab Relief Network"
+          }
+        ],
+        "requestId": "REQ-2026-123714",
+        "createdAt": "2026-09-20T07:01:31.513Z",
+        "updatedAt": "2026-09-20T07:04:43.593Z",
+        "__v": 3,
+        "claimedBy": "6aaf7d63a82968dbb8282f3e",
+        "claimedOrg": "6aaf7d63a82968dbb8282f41"
+      },
+      {
+        "_id": "6aaf860fe304cc9e92e54773",
+        "category": "medical",
+        "categoryRef": "6aaf7d63a82968dbb8282f34",
+        "description": "People having constipation",
+        "location": {
+          "preciseLat": 30.351756,
+          "preciseLng": 76.362407,
+          "publicLat": 30.353134,
+          "publicLng": 76.364852
+        },
+        "status": "resolved",
+        "contactPhone": "9876543210",
+        "statusHistory": [
+          {
+            "status": "unverified",
+            "changedAt": "2026-09-20T07:06:55.129Z",
+            "note": "Initial request submission"
+          },
+          {
+            "status": "verified",
+            "changedAt": "2026-09-20T07:07:40.571Z",
+            "changedBy": "6aaf7d63a82968dbb8282f40",
+            "note": "Request verified by administrator"
+          },
+          {
+            "status": "in_progress",
+            "changedAt": "2026-09-20T07:08:09.574Z",
+            "changedBy": "6aaf7d63a82968dbb8282f3d",
+            "note": "Claimed by Rahul Sharma"
+          },
+          {
+            "status": "resolved",
+            "changedAt": "2026-09-20T07:08:27.285Z",
+            "changedBy": "6aaf7d63a82968dbb8282f3d",
+            "note": "Resolution reported by Rahul Sharma"
+          }
+        ],
+        "requestId": "REQ-2026-860087",
+        "createdAt": "2026-09-20T07:06:55.129Z",
+        "updatedAt": "2026-09-20T07:08:27.286Z",
+        "__v": 3,
+        "claimedBy": "6aaf7d63a82968dbb8282f3d"
+      }
+    ],
+    "requestassignments": [
+      {
+        "_id": "6aaf7f97e304cc9e92e54765",
+        "request": "6aaf7f6ce304cc9e92e54760",
+        "assignedTo": "6aaf7d63a82968dbb8282f3d",
+        "assignedBy": "6aaf7d63a82968dbb8282f3d",
+        "quantityAllocated": 1,
+        "role": "lead",
+        "status": "completed",
+        "assignedAt": "2026-09-20T06:39:19.521Z",
+        "notes": "Claimed by Rahul Sharma",
+        "createdAt": "2026-09-20T06:39:19.522Z",
+        "updatedAt": "2026-09-20T06:41:26.396Z",
+        "__v": 0,
+        "completedAt": "2026-09-20T06:41:26.395Z"
+      },
+      {
+        "_id": "6aaf83cce304cc9e92e5476a",
+        "request": "6aaf8334e304cc9e92e54768",
+        "assignedTo": "6aaf7d63a82968dbb8282f3d",
+        "assignedBy": "6aaf7d63a82968dbb8282f3d",
+        "quantityAllocated": 1,
+        "role": "lead",
+        "status": "completed",
+        "assignedAt": "2026-09-20T06:57:16.762Z",
+        "notes": "Claimed by Rahul Sharma",
+        "createdAt": "2026-09-20T06:57:16.763Z",
+        "updatedAt": "2026-09-20T06:57:58.423Z",
+        "__v": 0,
+        "completedAt": "2026-09-20T06:57:58.423Z"
+      },
+      {
+        "_id": "6aaf853fe304cc9e92e5476f",
+        "request": "6aaf84cbe304cc9e92e5476d",
+        "assignedTo": "6aaf7d63a82968dbb8282f3e",
+        "assignedBy": "6aaf7d63a82968dbb8282f3e",
+        "assignedOrg": "6aaf7d63a82968dbb8282f41",
+        "quantityAllocated": 1,
+        "role": "lead",
+        "status": "completed",
+        "assignedAt": "2026-09-20T07:03:27.594Z",
+        "notes": "Claimed by Punjab Relief Network",
+        "createdAt": "2026-09-20T07:03:27.595Z",
+        "updatedAt": "2026-09-20T07:04:43.652Z",
+        "__v": 0,
+        "completedAt": "2026-09-20T07:04:43.652Z"
+      },
+      {
+        "_id": "6aaf8659e304cc9e92e54775",
+        "request": "6aaf860fe304cc9e92e54773",
+        "assignedTo": "6aaf7d63a82968dbb8282f3d",
+        "assignedBy": "6aaf7d63a82968dbb8282f3d",
+        "quantityAllocated": 1,
+        "role": "lead",
+        "status": "completed",
+        "assignedAt": "2026-09-20T07:08:09.624Z",
+        "notes": "Claimed by Rahul Sharma",
+        "createdAt": "2026-09-20T07:08:09.625Z",
+        "updatedAt": "2026-09-20T07:08:27.334Z",
+        "__v": 0,
+        "completedAt": "2026-09-20T07:08:27.334Z"
+      }
+    ],
+    "verifications": [
+      {
+        "_id": "6aaf7f90e304cc9e92e54763",
+        "request": "6aaf7f6ce304cc9e92e54760",
+        "verifiedBy": "6aaf7d63a82968dbb8282f40",
+        "timestamp": "2026-09-20T06:39:12.089Z",
+        "result": "verified_legitimate",
+        "method": "phone_call",
+        "contactAttempted": true,
+        "priorityAssessment": "high",
+        "createdAt": "2026-09-20T06:39:12.089Z",
+        "updatedAt": "2026-09-20T06:39:12.089Z",
+        "__v": 0
+      },
+      {
+        "_id": "6aaf8380e304cc9e92e54769",
+        "request": "6aaf8334e304cc9e92e54768",
+        "verifiedBy": "6aaf7d63a82968dbb8282f40",
+        "timestamp": "2026-09-20T06:56:00.925Z",
+        "result": "verified_legitimate",
+        "method": "phone_call",
+        "contactAttempted": true,
+        "priorityAssessment": "high",
+        "createdAt": "2026-09-20T06:56:00.925Z",
+        "updatedAt": "2026-09-20T06:56:00.925Z",
+        "__v": 0
+      },
+      {
+        "_id": "6aaf8510e304cc9e92e5476e",
+        "request": "6aaf84cbe304cc9e92e5476d",
+        "verifiedBy": "6aaf7d63a82968dbb8282f40",
+        "timestamp": "2026-09-20T07:02:40.876Z",
+        "result": "verified_legitimate",
+        "method": "phone_call",
+        "contactAttempted": true,
+        "priorityAssessment": "high",
+        "createdAt": "2026-09-20T07:02:40.877Z",
+        "updatedAt": "2026-09-20T07:02:40.877Z",
+        "__v": 0
+      },
+      {
+        "_id": "6aaf863ce304cc9e92e54774",
+        "request": "6aaf860fe304cc9e92e54773",
+        "verifiedBy": "6aaf7d63a82968dbb8282f40",
+        "timestamp": "2026-09-20T07:07:40.629Z",
+        "result": "verified_legitimate",
+        "method": "phone_call",
+        "contactAttempted": true,
+        "priorityAssessment": "high",
+        "createdAt": "2026-09-20T07:07:40.630Z",
+        "updatedAt": "2026-09-20T07:07:40.630Z",
+        "__v": 0
+      }
+    ],
+    "notifications": [
+      {
+        "_id": "6aaf7f90e304cc9e92e54764",
+        "recipient": "6aaf7d63a82968dbb8282f3c",
+        "request": "6aaf7f6ce304cc9e92e54760",
+        "type": "request_verified",
+        "title": "Request Verified",
+        "message": "Your emergency request REQ-2026-382977 has been verified by dispatch and is queued for responder deployment.",
+        "isRead": false,
+        "createdAt": "2026-09-20T06:39:12.142Z",
+        "updatedAt": "2026-09-20T06:39:12.142Z",
+        "__v": 0
+      },
+      {
+        "_id": "6aaf7f97e304cc9e92e54766",
+        "recipient": "6aaf7d63a82968dbb8282f3c",
+        "request": "6aaf7f6ce304cc9e92e54760",
+        "type": "request_claimed",
+        "title": "Responder Assigned",
+        "message": "A responder has claimed your request REQ-2026-382977 and is responding.",
+        "isRead": false,
+        "createdAt": "2026-09-20T06:39:19.568Z",
+        "updatedAt": "2026-09-20T06:39:19.568Z",
+        "__v": 0
+      },
+      {
+        "_id": "6aaf8016e304cc9e92e54767",
+        "recipient": "6aaf7d63a82968dbb8282f3c",
+        "request": "6aaf7f6ce304cc9e92e54760",
+        "type": "request_resolved",
+        "title": "Request Marked Resolved",
+        "message": "Your request REQ-2026-382977 has been marked as resolved by responder/admin. Please confirm when safe to close.",
+        "isRead": false,
+        "createdAt": "2026-09-20T06:41:26.457Z",
+        "updatedAt": "2026-09-20T06:41:26.457Z",
+        "__v": 0
+      },
+      {
+        "_id": "6aaf856de304cc9e92e54772",
+        "recipient": "6aaf7d63a82968dbb8282f3e",
+        "request": "6aaf84cbe304cc9e92e5476d",
+        "type": "new_message",
+        "title": "New message on REQ-2026-123714",
+        "message": "Requester (Phone Verified): \"Received\"",
+        "isRead": false,
+        "createdAt": "2026-09-20T07:04:13.596Z",
+        "updatedAt": "2026-09-20T07:04:13.596Z",
+        "__v": 0
+      }
+    ],
+    "messages": [
+      {
+        "_id": "6aaf7f7ee304cc9e92e54762",
+        "request": "6aaf7f6ce304cc9e92e54760",
+        "sender": "6aaf7d63a82968dbb8282f3c",
+        "senderRole": "requester",
+        "senderName": "Requester",
+        "body": "Need Help",
+        "createdAt": "2026-09-20T06:38:54.772Z",
+        "updatedAt": "2026-09-20T06:38:54.772Z",
+        "__v": 0
+      },
+      {
+        "_id": "6aaf856de304cc9e92e54771",
+        "request": "6aaf84cbe304cc9e92e5476d",
+        "senderRole": "requester",
+        "senderName": "Requester (Phone Verified)",
+        "senderPhone": "9876512345",
+        "body": "Received",
+        "createdAt": "2026-09-20T07:04:13.548Z",
+        "updatedAt": "2026-09-20T07:04:13.548Z",
+        "__v": 0
+      }
+    ],
+    "resourceinventories": [
+      {
+        "_id": "6aaf7d64a82968dbb8282f4b",
+        "resource": "6aaf7d64a82968dbb8282f47",
+        "organization": "6aaf7d63a82968dbb8282f42",
+        "ownerType": "Organization",
+        "ownerId": "6aaf7d63a82968dbb8282f42",
+        "quantityAvailable": 45,
+        "quantityReserved": 5,
+        "location": {
+          "address": "Central Pharmacy Warehouse Depot",
+          "lat": 30.89,
+          "lng": 75.86
+        },
+        "status": "available",
+        "createdAt": "2026-09-20T06:29:56.375Z",
+        "updatedAt": "2026-09-20T06:29:56.375Z",
+        "__v": 0
+      },
+      {
+        "_id": "6aaf7d64a82968dbb8282f4c",
+        "resource": "6aaf7d64a82968dbb8282f48",
+        "organization": "6aaf7d63a82968dbb8282f41",
+        "ownerType": "Organization",
+        "ownerId": "6aaf7d63a82968dbb8282f41",
+        "quantityAvailable": 8,
+        "quantityReserved": 2,
+        "location": {
+          "address": "Punjab Relief Logistics Base",
+          "lat": 30.9,
+          "lng": 75.85
+        },
+        "status": "available",
+        "createdAt": "2026-09-20T06:29:56.375Z",
+        "updatedAt": "2026-09-20T06:29:56.375Z",
+        "__v": 0
+      },
+      {
+        "_id": "6aaf7d64a82968dbb8282f4a",
+        "resource": "6aaf7d64a82968dbb8282f46",
+        "organization": "6aaf7d63a82968dbb8282f41",
+        "ownerType": "Organization",
+        "ownerId": "6aaf7d63a82968dbb8282f41",
+        "quantityAvailable": 4,
+        "quantityReserved": 1,
+        "location": {
+          "address": "Sector 4 Boat Launch Staging Ground",
+          "lat": 30.91,
+          "lng": 75.85
+        },
+        "status": "available",
+        "createdAt": "2026-09-20T06:29:56.375Z",
+        "updatedAt": "2026-09-20T06:29:56.375Z",
+        "__v": 0
+      },
+      {
+        "_id": "6aaf7d64a82968dbb8282f4d",
+        "resource": "6aaf7d64a82968dbb8282f49",
+        "organization": "6aaf7d63a82968dbb8282f43",
+        "ownerType": "Organization",
+        "ownerId": "6aaf7d63a82968dbb8282f43",
+        "quantityAvailable": 2,
+        "quantityReserved": 0,
+        "location": {
+          "address": "Sector 4 Community Depot",
+          "lat": 30.905,
+          "lng": 75.855
+        },
+        "status": "available",
+        "createdAt": "2026-09-20T06:29:56.375Z",
+        "updatedAt": "2026-09-20T06:29:56.375Z",
+        "__v": 0
+      },
+      {
+        "_id": "6aaf848be304cc9e92e5476c",
+        "resource": "6aaf848be304cc9e92e5476b",
+        "ownerType": "User",
+        "ownerId": "6aaf7d63a82968dbb8282f3e",
+        "quantityAvailable": 50,
+        "quantityReserved": 0,
+        "status": "available",
+        "createdAt": "2026-09-20T07:00:27.121Z",
+        "updatedAt": "2026-09-20T07:00:27.121Z",
+        "__v": 0
+      }
+    ]
+  }
+}

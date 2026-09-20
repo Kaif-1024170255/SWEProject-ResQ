@@ -3,17 +3,39 @@ node_modules/
 .pnp
 .pnp.js
 
-# Environment files
+# Environment files & secrets
 .env
 .env.local
 .env.*.local
+.env.*
+*.env
 
 # Production / Build output
 dist/
 build/
 coverage/
+*.tsbuildinfo
+.nyc_output/
+client/dist/
+server/dist/
+
+# Uploads & local storage (evidence files, attachments)
+uploads/
+server/uploads/
+server/uploads/**
+!server/uploads/.gitkeep
+
+# Playwright & test reports
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+client/test-results/
+client/playwright-report/
 
 # Logs
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

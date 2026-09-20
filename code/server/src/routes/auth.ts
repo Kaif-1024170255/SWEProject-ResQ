@@ -75,6 +75,7 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
         name: newUser.name,
         email: newUser.email,
         role: newUser.role,
+        organizationId: newUser.organizationId,
       },
     });
   } catch (error) {
@@ -125,6 +126,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
         name: user.name,
         email: user.email,
         role: user.role,
+        organizationId: user.organizationId,
       },
     });
   } catch (error) {
@@ -150,6 +152,7 @@ router.get('/me', requireAuth, async (req: Request, res: Response): Promise<void
         name: user.name,
         email: user.email,
         role: user.role,
+        organizationId: user.organizationId,
       },
     });
   } catch (error) {

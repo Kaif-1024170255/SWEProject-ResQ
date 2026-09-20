@@ -4,6 +4,7 @@ export type ChipStatus =
   | 'in_progress'
   | 'resolved'
   | 'closed'
+  | 'cancelled'
   | 'critical';
 
 interface StatusChipProps {
@@ -45,6 +46,12 @@ export default function StatusChip({ status, className = '' }: StatusChipProps) 
           border: 'border-l-slate text-slate',
           dot: 'bg-slate',
           label: 'CLOSED',
+        };
+      case 'cancelled':
+        return {
+          border: 'border-l-rust text-slate',
+          dot: 'bg-rust',
+          label: 'CANCELLED',
         };
       case 'critical':
         return {

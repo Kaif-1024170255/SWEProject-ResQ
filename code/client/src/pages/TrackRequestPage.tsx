@@ -1,21 +1,32 @@
 import { useState, useEffect, FormEvent } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import LifecycleStrip from '../components/LifecycleStrip';
 import StatusChip from '../components/StatusChip';
+import RequestCommsLog from '../components/RequestCommsLog';
+import EvidenceAttachmentList from '../components/EvidenceAttachmentList';
+import ResourceFulfillmentDisplay from '../components/ResourceFulfillmentDisplay';
+import { VerificationAuditRecord } from '../components/VerificationAuditRecord';
+import { subscribeToPublic } from '../services/socket';
 
 interface RequestDetails {
   _id: string;
   requestId: string;
   category: string;
   description: string;
+  status: 'unverified' | 'verified' | 'in_progress' | 'resolved' | 'closed' | 'cancelled';
   location: {
     publicLat: number;
     publicLng: number;
     preciseLat?: number;
     preciseLng?: number;
   };
-  status: 'unverified' | 'verified' | 'in_progress' | 'resolved' | 'closed';
   contactPhone?: string;
+  createdBy?: {
+    _id?: string;
+    name?: string;
+    role?: string;
+  } | string;
   createdAt: string;
   updatedAt: string;
   claimedBy?: {
@@ -29,19 +40,12 @@ interface RequestDetails {
   }>;
 }
 
-const LIFECYCLE_STAGES = [
-  { num: '01', key: 'unverified', label: 'Unverified' },
-  { num: '02', key: 'verified', label: 'Verified' },
-  { num: '03', key: 'in_progress', label: 'In Progress' },
-  { num: '04', key: 'resolved', label: 'Resolved' },
-  { num: '05', key: 'closed', label: 'Closed' },
-];
-
 export default function TrackRequestPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { id: routeId } = useParams();
   const { token, user } = useAuth();
 
-  const [searchId, setSearchId] = useState(searchParams.get('id') || '');
+  const [searchId, setSearchId] = useState(routeId || searchParams.get('id') || '');
   const [requestData, setRequestData] = useState<RequestDetails | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -49,6 +53,13 @@ export default function TrackRequestPage() {
   const [confirmPhone, setConfirmPhone] = useState('');
   const [isConfirming, setIsConfirming] = useState(false);
   const [confirmSuccessMsg, setConfirmSuccessMsg] = useState<string | null>(null);
+
+  // Cancellation / withdrawal state
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [cancelPhone, setCancelPhone] = useState('');
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelError, setCancelError] = useState<string | null>(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   const fetchRequest = async (reqId: string) => {
     if (!reqId.trim()) return;
@@ -85,12 +96,31 @@ export default function TrackRequestPage() {
   };
 
   useEffect(() => {
-    const idFromQuery = searchParams.get('id');
-    if (idFromQuery) {
-      setSearchId(idFromQuery);
-      fetchRequest(idFromQuery);
+    const targetId = routeId || searchParams.get('id');
+    if (targetId) {
+      setSearchId(targetId);
+      fetchRequest(targetId);
     }
-  }, [searchParams]);
+  }, [routeId, searchParams]);
+
+  // Real-time synchronization for currently tracked request
+  useEffect(() => {
+    if (!requestData?.requestId) return;
+
+    const sub = subscribeToPublic<{ request: RequestDetails }>(
+      'request:updated',
+      (payload) => {
+        if (
+          payload?.request &&
+          payload.request.requestId === requestData.requestId
+        ) {
+          setRequestData((prev) => (prev ? { ...prev, ...payload.request } : prev));
+        }
+      }
+    );
+
+    return () => sub.unsubscribe();
+  }, [requestData?.requestId]);
 
   const handleSearchSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -139,11 +169,46 @@ export default function TrackRequestPage() {
     }
   };
 
-  const getStageIndex = (status: string) => {
-    return LIFECYCLE_STAGES.findIndex((s) => s.key === status);
-  };
+  const handleCancelRequest = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!requestData) return;
 
-  const currentStageIndex = requestData ? getStageIndex(requestData.status) : -1;
+    setIsCancelling(true);
+    setCancelError(null);
+
+    try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const phone = cancelPhone.trim() || confirmPhone.trim() || requestData.contactPhone;
+      const payload: Record<string, string> = {};
+      if (phone) payload.contactPhone = phone;
+      if (cancelReason.trim()) payload.reason = cancelReason.trim();
+
+      const res = await fetch(`/api/requests/${encodeURIComponent(requestData.requestId)}/cancel`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to withdraw emergency request.');
+      }
+
+      setShowCancelModal(false);
+      setConfirmSuccessMsg('Request has been withdrawn.');
+      fetchRequest(requestData.requestId);
+    } catch (err: unknown) {
+      setCancelError(err instanceof Error ? err.message : 'Error withdrawing request.');
+    } finally {
+      setIsCancelling(false);
+    }
+  };
 
   return (
     <div className="max-w-[840px] mx-auto px-4 sm:px-8 py-12">
@@ -240,40 +305,7 @@ export default function TrackRequestPage() {
             <div className="font-mono text-xs text-slate uppercase tracking-wider mb-2">
               Lifecycle Progression
             </div>
-            <div className="flex border border-slate-line bg-paper-raised">
-              {LIFECYCLE_STAGES.map((stage, idx) => {
-                const isCurrent = stage.key === requestData.status;
-                const isPassed = idx < currentStageIndex;
-
-                return (
-                  <div
-                    key={stage.key}
-                    className={`flex-1 p-3 sm:p-4 border-r border-slate-line last:border-r-0 transition-colors ${
-                      isCurrent
-                        ? 'bg-teal-bg'
-                        : isPassed
-                        ? 'bg-[#F2F5F3]'
-                        : 'bg-paper-raised opacity-70'
-                    }`}
-                  >
-                    <div
-                      className={`font-mono text-[11px] ${
-                        isCurrent ? 'text-teal font-bold' : 'text-slate'
-                      }`}
-                    >
-                      {stage.num}
-                    </div>
-                    <div
-                      className={`text-xs sm:text-sm font-semibold mt-1 ${
-                        isCurrent ? 'text-teal' : isPassed ? 'text-ink' : 'text-slate'
-                      }`}
-                    >
-                      {stage.label}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <LifecycleStrip currentStatus={requestData.status} />
           </div>
 
           {/* Details Card */}
@@ -363,12 +395,52 @@ export default function TrackRequestPage() {
               </div>
             )}
 
+            {/* Requester Action: Withdraw / Cancel Request */}
+            {(requestData.status === 'unverified' ||
+              requestData.status === 'verified' ||
+              requestData.status === 'in_progress' ||
+              (user?.role === 'admin' && requestData.status !== 'closed' && requestData.status !== 'cancelled')) && (
+              <div className="p-4 bg-paper-raised border border-slate-line flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <div className="font-mono text-xs font-semibold text-ink uppercase">
+                    Assistance No Longer Required?
+                  </div>
+                  <p className="text-slate text-xs mt-0.5 leading-relaxed">
+                    If you evacuated safely, secured private aid, or no longer need emergency assistance, you can withdraw this ticket so response teams can focus on active operations.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowCancelModal(true)}
+                  className="bg-paper text-rust border border-rust hover:bg-rust/10 font-sans text-xs font-semibold px-4 py-2 rounded-[3px] cursor-pointer whitespace-nowrap self-start sm:self-auto"
+                >
+                  Withdraw this request
+                </button>
+              </div>
+            )}
+
             {/* Closed Notice */}
             {requestData.status === 'closed' && (
               <div className="p-4 bg-paper border border-slate-line border-l-[3px] border-l-slate">
                 <div className="font-mono text-xs text-slate font-semibold">
                   CLOSED ARCHIVE: This emergency request has been fully resolved and confirmed by the requester.
                 </div>
+              </div>
+            )}
+
+            {/* Cancelled Notice */}
+            {requestData.status === 'cancelled' && (
+              <div className="p-4 bg-paper border border-slate-line border-l-[3px] border-l-rust">
+                <div className="font-mono text-xs text-rust font-semibold">
+                  WITHDRAWN / CANCELLED: This emergency request was withdrawn and is closed on the active dispatch registry.
+                </div>
+              </div>
+            )}
+
+            {/* Structured Verification Audit Record */}
+            {requestData.status !== 'unverified' && (
+              <div className="pt-4 border-t border-slate-line">
+                <VerificationAuditRecord requestId={requestData.requestId} />
               </div>
             )}
 
@@ -396,6 +468,114 @@ export default function TrackRequestPage() {
                 </div>
               </div>
             )}
+
+            {/* Resource Allocation & Fulfillment Progress */}
+            <div className="pt-4 border-t border-slate-line">
+              <ResourceFulfillmentDisplay
+                requestId={requestData.requestId}
+                contactPhone={confirmPhone || requestData.contactPhone}
+              />
+            </div>
+
+            {/* Communications Log (Triage & Field Ops) */}
+            <div className="pt-4 border-t border-slate-line">
+              <RequestCommsLog
+                requestId={requestData.requestId}
+                requestStatus={requestData.status}
+                defaultContactPhone={confirmPhone || requestData.contactPhone}
+                requestCreatedById={
+                  typeof requestData.createdBy === 'object'
+                    ? requestData.createdBy?._id
+                    : requestData.createdBy
+                }
+              />
+            </div>
+
+            {/* Supporting Evidence & Documents */}
+            <div className="pt-4 border-t border-slate-line">
+              <EvidenceAttachmentList requestId={requestData.requestId} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Withdrawal / Cancellation Confirmation Modal */}
+      {showCancelModal && requestData && (
+        <div className="fixed inset-0 z-[2000] bg-ink/60 flex items-center justify-center p-4">
+          <div className="bg-paper-raised border border-slate-line max-w-md w-full p-5 space-y-4 shadow-xl">
+            <div className="flex items-center justify-between border-b border-slate-line pb-3">
+              <div className="font-mono text-xs font-bold text-ink uppercase">
+                Withdraw Emergency Ticket [{requestData.requestId}]
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCancelModal(false)}
+                className="font-mono text-xs text-slate hover:text-ink cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {cancelError && (
+              <div className="p-2.5 bg-paper border border-slate-line border-l-[3px] border-l-rust font-mono text-xs text-rust">
+                {cancelError}
+              </div>
+            )}
+
+            <form onSubmit={handleCancelRequest} className="space-y-3 text-xs font-sans">
+              <p className="text-slate leading-relaxed">
+                Are you sure you want to withdraw this emergency request? This will stand down active dispatching, remove the pin from the live operations map, and release any reserved supplies.
+              </p>
+
+              {!token && (
+                <div>
+                  <label className="block font-mono text-[11px] text-slate uppercase mb-1">
+                    Contact Phone Number (Used during submission)
+                  </label>
+                  <input
+                    type="tel"
+                    value={cancelPhone}
+                    onChange={(e) => setCancelPhone(e.target.value)}
+                    placeholder="e.g. +91 98765 00000"
+                    className="w-full bg-white border border-slate-line focus:border-ink rounded-[3px] p-2 text-xs text-ink outline-none font-sans"
+                  />
+                  <div className="font-mono text-[10px] text-slate mt-1">
+                    Required for anonymous reports to verify you are the original requester.
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block font-mono text-[11px] text-slate uppercase mb-1">
+                  Reason for Withdrawal (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  placeholder="e.g. Evacuated safely, family arrived, water receded"
+                  className="w-full bg-white border border-slate-line focus:border-ink rounded-[3px] p-2 text-xs text-ink outline-none font-sans"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-line">
+                <button
+                  type="button"
+                  onClick={() => setShowCancelModal(false)}
+                  disabled={isCancelling}
+                  className="px-3 py-1.5 border border-slate-line font-mono text-xs text-slate hover:text-ink cursor-pointer disabled:opacity-50"
+                >
+                  Keep Request Active
+                </button>
+                <button
+                  type="submit"
+                  disabled={isCancelling}
+                  className="bg-rust text-white font-sans text-xs font-semibold px-4 py-1.5 rounded-[3px] hover:bg-rust/90 cursor-pointer disabled:opacity-50"
+                >
+                  {isCancelling ? 'Withdrawing...' : 'Confirm Withdrawal'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

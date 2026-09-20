@@ -9,6 +9,8 @@
     "start": "node dist/index.js",
     "lint": "tsc --noEmit",
     "seed": "tsx scripts/seed.ts",
+    "seed:fresh-pilot": "tsx scripts/seedFreshPilot.ts",
+    "export:pilot": "tsx scripts/exportPilotData.ts",
     "test": "vitest run"
   },
   "dependencies": {
@@ -17,16 +19,20 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.9.5"
+    "mongoose": "^9.9.5",
+    "multer": "^2.4.0",
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.2.0",
     "@types/node": "^22.10.1",
     "@types/supertest": "^6.0.2",
     "mongodb-memory-server": "^11.2.0",
+    "socket.io-client": "^4.8.3",
     "supertest": "^7.0.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",

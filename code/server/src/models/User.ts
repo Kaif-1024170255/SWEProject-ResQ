@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document, Types } from 'mongoose';
 
 export type UserRole =
   | 'affected_person'
@@ -15,14 +15,54 @@ export const USER_ROLES: UserRole[] = [
   'admin',
 ];
 
+export interface IUserLocation {
+  address?: string;
+  lat?: number;
+  lng?: number;
+}
+
+export interface IUserAvailability {
+  status?: 'available' | 'busy' | 'offline';
+  startHour?: number;
+  endHour?: number;
+  days?: string[];
+}
+
 export interface IUser extends Document {
   name: string;
   email: string;
   passwordHash: string;
   role: UserRole;
+  organizationId?: Types.ObjectId;
+  location?: IUserLocation;
+  availability?: IUserAvailability;
+  skills?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
+
+const userLocationSchema = new Schema<IUserLocation>(
+  {
+    address: { type: String, trim: true },
+    lat: { type: Number },
+    lng: { type: Number },
+  },
+  { _id: false }
+);
+
+const userAvailabilitySchema = new Schema<IUserAvailability>(
+  {
+    status: {
+      type: String,
+      enum: ['available', 'busy', 'offline'],
+      default: 'available',
+    },
+    startHour: { type: Number, min: 0, max: 23 },
+    endHour: { type: Number, min: 0, max: 23 },
+    days: [{ type: String, lowercase: true }],
+  },
+  { _id: false }
+);
 
 const userSchema = new Schema<IUser>(
   {
@@ -50,6 +90,23 @@ const userSchema = new Schema<IUser>(
         message: '{VALUE} is not a valid user role',
       },
       required: [true, 'Role is required'],
+    },
+    organizationId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Organization',
+      required: false,
+    },
+    location: {
+      type: userLocationSchema,
+      required: false,
+    },
+    availability: {
+      type: userAvailabilitySchema,
+      required: false,
+    },
+    skills: {
+      type: [String],
+      default: [],
     },
   },
   {
