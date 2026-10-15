@@ -1,0 +1,10 @@
+digraph G {
+ rankdir=TB; splines=ortho; nodesep=0.5; ranksep=0.6; bgcolor="white";
+ node [shape=box, style=rounded, fontname="Helvetica-Bold", fontsize=14, penwidth=1.2, width=2.1, height=0.55];
+ edge [penwidth=1.3, color="#111111", arrowsize=0.8];
+ U [label="Users"]; AP [label="Affected Persons"]; RS [label="Responders"];
+ RP [label="Resource Providers"]; AD [label="Administrators"];
+ V [label="Volunteers"]; N [label="NGO Members"];
+ U -> AP; U -> RS; U -> RP; U -> AD;
+ RS -> V; RS -> N;
+}

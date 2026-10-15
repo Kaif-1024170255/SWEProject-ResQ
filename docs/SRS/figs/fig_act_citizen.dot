@@ -1,0 +1,19 @@
+digraph G {
+ rankdir=TB; compound=true; nodesep=0.45; ranksep=0.55; bgcolor="white";
+ node [shape=box, style=rounded, fontname="Helvetica", fontsize=12, penwidth=1.1, width=1.35, height=0.7];
+ edge [penwidth=1.3, color="#111111", arrowsize=0.8];
+ subgraph cluster_a { label=<<B>Request Submission</B>>; labelloc=b; fontname="Helvetica-Bold"; fontsize=15; margin=18;
+   START [label="Affected Person\nor Bystander"];
+   A1 [label="Describe\nEmergency"]; A2 [label="Pin Location\non Map"]; A3 [label="Receive\nTracking ID"];
+   {rank=same; START; A1; A2; A3}
+   START -> A1 -> A2 -> A3; }
+ subgraph cluster_b { label=<<B>Request Tracking</B>>; labelloc=b; fontname="Helvetica-Bold"; fontsize=15; margin=18;
+   B1 [label="Watch Live\nStatus"]; B2 [label="Message\nResponder"]; B3 [label="Confirm\nResolution"];
+   {rank=same; B1; B2; B3}
+   B1 -> B2 -> B3; }
+ A1 -> B1 [style=invis];
+ A3 -> B1 [ltail=cluster_a, lhead=cluster_b, constraint=false];
+ PAGE [shape=plaintext, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5"><TR><TD BGCOLOR="#000000" PORT="h"><FONT COLOR="white" FACE="Helvetica-Bold" POINT-SIZE="13"><B>Citizen Tracking Page</B></FONT></TD></TR><TR><TD BGCOLOR="#D0CECE"><FONT FACE="Helvetica" POINT-SIZE="11">Tracking ID</FONT></TD></TR><TR><TD BGCOLOR="#E7E6E6"><FONT FACE="Helvetica" POINT-SIZE="11">Status Timeline</FONT></TD></TR><TR><TD BGCOLOR="#D0CECE"><FONT FACE="Helvetica" POINT-SIZE="11">Communications Log</FONT></TD></TR><TR><TD BGCOLOR="#E7E6E6"><FONT FACE="Helvetica" POINT-SIZE="11">Supply Needs</FONT></TD></TR><TR><TD BGCOLOR="#D0CECE"><FONT FACE="Helvetica" POINT-SIZE="11">Withdraw Request</FONT></TD></TR></TABLE>>];
+
+ B3 -> PAGE:h [ltail=cluster_b];
+}

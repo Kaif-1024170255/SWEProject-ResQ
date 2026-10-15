@@ -1,0 +1,14 @@
+digraph G {
+ rankdir=LR; nodesep=0.5; ranksep=1.0; bgcolor="white";
+edge [fontname="Helvetica", fontsize=10, color="#222222", penwidth=1.2, arrowsize=0.8];
+ORG [shape=plaintext, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" STYLE="DASHED"><TR><TD BGCOLOR="white"><FONT FACE="Helvetica-Bold" POINT-SIZE="12"><B>Organization</B></FONT><BR/><FONT FACE="Helvetica" POINT-SIZE="9">(defined in an earlier figure)</FONT></TD></TR></TABLE>>];
+REQ [shape=plaintext, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" STYLE="DASHED"><TR><TD BGCOLOR="white"><FONT FACE="Helvetica-Bold" POINT-SIZE="12"><B>Request</B></FONT><BR/><FONT FACE="Helvetica" POINT-SIZE="9">(defined in an earlier figure)</FONT></TD></TR></TABLE>>];
+RES [shape=plaintext, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5"><TR><TD BGCOLOR="#000000" PORT="h"><FONT COLOR="white" FACE="Helvetica-Bold" POINT-SIZE="13"><B>Resource</B></FONT></TD></TR><TR><TD BGCOLOR="#D0CECE"><FONT FACE="Helvetica" POINT-SIZE="11">name</FONT></TD></TR><TR><TD BGCOLOR="#E7E6E6"><FONT FACE="Helvetica" POINT-SIZE="11">type</FONT></TD></TR><TR><TD BGCOLOR="#D0CECE"><FONT FACE="Helvetica" POINT-SIZE="11">unit</FONT></TD></TR><TR><TD BGCOLOR="#E7E6E6"><FONT FACE="Helvetica" POINT-SIZE="11">perishable</FONT></TD></TR><TR><TD BGCOLOR="#D0CECE"><FONT FACE="Helvetica" POINT-SIZE="11">organizationId</FONT></TD></TR></TABLE>>];
+INV [shape=plaintext, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5"><TR><TD BGCOLOR="#000000" PORT="h"><FONT COLOR="white" FACE="Helvetica-Bold" POINT-SIZE="13"><B>ResourceInventory</B></FONT></TD></TR><TR><TD BGCOLOR="#D0CECE"><FONT FACE="Helvetica" POINT-SIZE="11">resourceId</FONT></TD></TR><TR><TD BGCOLOR="#E7E6E6"><FONT FACE="Helvetica" POINT-SIZE="11">organizationId</FONT></TD></TR><TR><TD BGCOLOR="#D0CECE"><FONT FACE="Helvetica" POINT-SIZE="11">quantityAvailable</FONT></TD></TR><TR><TD BGCOLOR="#E7E6E6"><FONT FACE="Helvetica" POINT-SIZE="11">quantityReserved</FONT></TD></TR></TABLE>>];
+RR [shape=plaintext, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5"><TR><TD BGCOLOR="#000000" PORT="h"><FONT COLOR="white" FACE="Helvetica-Bold" POINT-SIZE="13"><B>RequestResource</B></FONT></TD></TR><TR><TD BGCOLOR="#D0CECE"><FONT FACE="Helvetica" POINT-SIZE="11">requestId</FONT></TD></TR><TR><TD BGCOLOR="#E7E6E6"><FONT FACE="Helvetica" POINT-SIZE="11">resourceId</FONT></TD></TR><TR><TD BGCOLOR="#D0CECE"><FONT FACE="Helvetica" POINT-SIZE="11">requiredQty</FONT></TD></TR><TR><TD BGCOLOR="#E7E6E6"><FONT FACE="Helvetica" POINT-SIZE="11">allocatedQty</FONT></TD></TR><TR><TD BGCOLOR="#D0CECE"><FONT FACE="Helvetica" POINT-SIZE="11">status</FONT></TD></TR></TABLE>>];
+ RES -> ORG;
+ INV -> RES;
+ INV -> ORG;
+ RR -> REQ;
+ RR -> RES;
+}

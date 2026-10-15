@@ -1,0 +1,7 @@
+digraph G {
+ bgcolor="white";
+ subgraph cluster_x { label=<<B>Resource Provider</B>>; labelloc=b; fontname="Helvetica-Bold"; fontsize=16; margin=22;
+ RP [shape=plaintext, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5"><TR><TD BGCOLOR="#000000" PORT="h"><FONT COLOR="white" FACE="Helvetica-Bold" POINT-SIZE="13"><B>Resource Provider</B></FONT></TD></TR><TR><TD BGCOLOR="#D0CECE"><FONT FACE="Helvetica" POINT-SIZE="11">Register Resource</FONT></TD></TR><TR><TD BGCOLOR="#E7E6E6"><FONT FACE="Helvetica" POINT-SIZE="11">Manage Inventory</FONT></TD></TR><TR><TD BGCOLOR="#D0CECE"><FONT FACE="Helvetica" POINT-SIZE="11">Allocate Supplies to Request</FONT></TD></TR></TABLE>>];
+
+ }
+}
