@@ -90,3 +90,18 @@ The application strictly follows the **Field Ops Ledger** design specification:
   - `text-ink` (`#14213D`), `text-slate` (`#5B6670`)
   - Status tokens: `amber` (`#D98E2B`), `teal` (`#1F7A6C`), `rust` (`#B23A2F`)
   - Typography: `font-sans` (**Public Sans**), `font-mono` (**IBM Plex Mono**)
+
+---
+
+## Test Inventory & Verification
+
+ResQ maintains a mechanically verified test case inventory cataloging all automated Vitest unit/integration tests and Playwright end-to-end specs, traceability matrices, manual pilot records, and known coverage gaps.
+
+To regenerate `docs/TEST_CASES.md` and `docs/test-inventory.json`:
+
+```bash
+cd server
+npm run inventory
+```
+
+The generator inspects all test files using the TypeScript Compiler AST parser, cross-validates each discovered test 1:1 against `docs/test-case-annotations.json`, and writes both machine-readable JSON and human-readable Markdown outputs. If any test lacks an annotation or if an orphaned annotation is found, the script fails with exit code `1` to prevent documentation drift.

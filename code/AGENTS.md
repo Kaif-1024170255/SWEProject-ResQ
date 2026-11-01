@@ -344,3 +344,49 @@ WHEN TO ASK ME FOR HELP (in addition to existing lists):
   awareness of what was broken.
 
 ---
+
+SCOPE: Presentation polish only — a test case inventory and a home page
+redesign. No new backend routes, no schema changes, no changes to application
+behaviour. If something here seems to need one, stop and ask me.
+
+NOTHING IS INVENTED:
+- Every test case listed anywhere (the .md file, the JSON, the website) must
+  come from a real test that exists in the repository: a real it()/test() in
+  a Vitest file or a real test() in a Playwright spec, or a clearly labelled
+  manual validation record from the Phase 5 pilot.
+- Every count shown anywhere (tests per area, total tests, number of files)
+  must be computed from the real files or a real test run — never typed in by
+  hand, never copied from an earlier report. If a number on the site could
+  silently go stale, generate it from the inventory instead.
+- If you cannot determine something (for example which phase a test was
+  introduced in), write "not determinable" rather than guessing.
+
+NO SECRETS IN DOCUMENTS:
+- The inventory will be turned into a PDF and shown to an instructor. Test
+  files contain seeded demo emails and passwords, and may reference JWT
+  secrets or API keys. Never copy a password, token, secret or API key into
+  TEST_CASES.md, the JSON, or the website. Write "<seeded demo password>"
+  or similar instead. Email addresses of seeded demo users may be described
+  by role ("the volunteer account") rather than copied.
+
+DEFINITION OF DONE — same standard as earlier phases:
+A prompt is complete only when tests pass AND you have personally opened the
+result (the generated file, or the page in a running browser) and checked it
+against the real repository, not against memory of earlier work.
+
+DESIGN — STILL FOLLOWS DESIGN_SYSTEM.md:
+- The home page is a dispatch-console style page, not a startup landing page:
+  no hero gradients, no big rounded CTA pills, no "Trusted by" rows, no
+  testimonial carousels, no stock illustrations. Reuse the existing status
+  chip, lifecycle strip and dense-row components.
+- Compact means measurably compact (see Prompt 2), not just smaller padding.
+
+WHEN TO ASK ME FOR HELP (in addition to existing lists):
+- The route: keep the home page at its current route unless I say otherwise.
+- Testing the page on my actual phone — tell me exactly what to check and
+  wait for my findings; do not mark mobile as confirmed from a resized
+  desktop window.
+- Anything on the home page you are not sure is true of the current system.
+  Verify it in the code first; if the code does not settle it, ask me.
+
+---

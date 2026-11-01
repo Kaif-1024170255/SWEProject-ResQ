@@ -11,6 +11,7 @@
     "seed": "tsx scripts/seed.ts",
     "seed:fresh-pilot": "tsx scripts/seedFreshPilot.ts",
     "export:pilot": "tsx scripts/exportPilotData.ts",
+    "inventory": "tsx ../scripts/generate-test-inventory.ts",
     "test": "vitest run"
   },
   "dependencies": {
