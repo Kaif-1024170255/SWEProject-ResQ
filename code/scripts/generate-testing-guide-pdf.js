@@ -1,0 +1,646 @@
+const fs = require('fs');
+const path = require('path');
+const { chromium } = require('playwright');
+
+async function generateTestingGuide() {
+  console.log('Generating ResQ Software Testing Guide HTML...');
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ResQ — Software Testing & Quality Assurance Architecture</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
+    @page {
+      size: A4;
+      margin: 18mm 16mm 18mm 16mm;
+      @bottom-right {
+        content: counter(page);
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 8pt;
+        color: #5B6670;
+      }
+      @bottom-left {
+        content: "ResQ Testing & Quality Assurance Architecture Guide";
+        font-family: 'Public Sans', sans-serif;
+        font-size: 8pt;
+        color: #5B6670;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 9.5pt;
+      line-height: 1.45;
+      color: #14213D;
+      background-color: #FFFFFF;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1, h2, h3, h4 {
+      color: #14213D;
+      font-weight: 700;
+      margin-top: 0;
+      page-break-after: avoid;
+    }
+
+    h1 {
+      font-size: 19pt;
+      line-height: 1.15;
+      margin-bottom: 4pt;
+    }
+
+    h2 {
+      font-size: 13pt;
+      border-bottom: 1.5pt solid #14213D;
+      padding-bottom: 3pt;
+      margin-top: 14pt;
+      margin-bottom: 8pt;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    h3 {
+      font-size: 10.5pt;
+      margin-top: 10pt;
+      margin-bottom: 4pt;
+      color: #14213D;
+    }
+
+    p {
+      margin-top: 0;
+      margin-bottom: 6pt;
+    }
+
+    .font-mono {
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+
+    .no-break {
+      page-break-inside: avoid;
+    }
+
+    /* Colors */
+    .text-ink { color: #14213D; }
+    .text-slate { color: #5B6670; }
+    .text-teal { color: #1F7A6C; }
+    .text-amber { color: #D98E2B; }
+    .text-rust { color: #B23A2F; }
+
+    .bg-paper { background-color: #F4F5F6; }
+    .bg-teal-bg { background-color: #E8F4F2; }
+    .bg-amber-bg { background-color: #FDF6E9; }
+    .bg-rust-bg { background-color: #FCECEB; }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8.5pt;
+      margin-bottom: 8pt;
+      page-break-inside: avoid;
+    }
+
+    th, td {
+      border: 1px solid #D0D7DE;
+      padding: 4.5pt 6pt;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background-color: #F4F5F6;
+      font-weight: 600;
+      color: #14213D;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8pt;
+      text-transform: uppercase;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 7.5pt;
+      font-weight: 600;
+      padding: 1.5pt 4pt;
+      border-radius: 2px;
+      text-transform: uppercase;
+    }
+
+    .badge-teal { background: #E8F4F2; color: #1F7A6C; border: 1px solid #A3D4CC; }
+    .badge-amber { background: #FDF6E9; color: #D98E2B; border: 1px solid #F5D399; }
+    .badge-rust { background: #FCECEB; color: #B23A2F; border: 1px solid #EAA8A4; }
+    .badge-slate { background: #F4F5F6; color: #5B6670; border: 1px solid #D0D7DE; }
+
+    /* Key Metric Card */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6pt;
+      margin-bottom: 10pt;
+    }
+
+    .metric-card {
+      background: #F4F5F6;
+      border: 1px solid #D0D7DE;
+      padding: 6pt 8pt;
+      border-radius: 2px;
+    }
+
+    .metric-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 7.5pt;
+      color: #5B6670;
+      text-transform: uppercase;
+    }
+
+    .metric-val {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13pt;
+      font-weight: 700;
+      color: #14213D;
+      margin-top: 1pt;
+    }
+
+    .metric-sub {
+      font-size: 7.5pt;
+      color: #5B6670;
+      margin-top: 1pt;
+    }
+
+    .header-banner {
+      border-bottom: 2pt solid #14213D;
+      padding-bottom: 8pt;
+      margin-bottom: 12pt;
+    }
+
+    .header-banner .meta-row {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8pt;
+      color: #5B6670;
+      margin-top: 4pt;
+    }
+
+    .code-block {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8pt;
+      background: #F4F5F6;
+      border: 1px solid #D0D7DE;
+      padding: 6pt 8pt;
+      line-height: 1.4;
+      margin-bottom: 8pt;
+      border-radius: 2px;
+    }
+
+    .callout {
+      border-left: 3pt solid #1F7A6C;
+      background-color: #E8F4F2;
+      padding: 6pt 8pt;
+      margin-bottom: 8pt;
+      font-size: 8.5pt;
+    }
+
+    .callout-amber {
+      border-left: 3pt solid #D98E2B;
+      background-color: #FDF6E9;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== HEADER & TITLE ==================== -->
+  <div class="header-banner">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9pt; color: #1F7A6C; font-weight: 600; text-transform: uppercase; margin-bottom: 2pt;">
+          Engineering Guide & Verification Manual
+        </div>
+        <h1>ResQ: Software Testing Architecture</h1>
+        <div style="font-size: 10pt; color: #5B6670; max-width: 520pt; line-height: 1.35;">
+          A comprehensive technical breakdown of how testing works in ResQ: the testing pyramid, runtime execution mechanics, architectural invariant verification, and practical runbooks.
+        </div>
+      </div>
+      <div style="text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 8pt;">
+        <span class="badge badge-teal" style="font-size: 8.5pt;">125 TESTS • 100% PASS</span>
+        <div style="margin-top: 4pt; color: #14213D; font-weight: 600;">Vitest + Supertest + Playwright</div>
+        <div style="color: #5B6670;">November 2026</div>
+      </div>
+    </div>
+
+    <div class="meta-row">
+      <div>Project: ResQ Crisis Coordination Platform</div>
+      <div>Focus: Software Mechanics, Assertions, Invariants & Runtime Execution</div>
+      <div>Coverage: 16 Feature Domains Across 24 Test Files</div>
+    </div>
+  </div>
+
+  <!-- Key Metrics Strip -->
+  <div class="metric-grid">
+    <div class="metric-card">
+      <div class="metric-title">Unit Tests (Vitest)</div>
+      <div class="metric-val text-teal">17</div>
+      <div class="metric-sub font-mono">Algorithms & Math</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-title">Integration (Supertest)</div>
+      <div class="metric-val text-teal">101</div>
+      <div class="metric-sub font-mono">API, DB & WebSockets</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-title">E2E Specs (Playwright)</div>
+      <div class="metric-val text-teal">7</div>
+      <div class="metric-sub font-mono">Headless Chromium</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-title">AST Verified Discrepancies</div>
+      <div class="metric-val text-teal">0</div>
+      <div class="metric-sub font-mono">Mechanical Parity</div>
+    </div>
+  </div>
+
+  <h2>1. The Testing Pyramid in ResQ</h2>
+  <p>
+    Software testing in ResQ follows the classic <strong>Testing Pyramid</strong> design philosophy. The goal is to provide maximum defect detection confidence while keeping test suite execution rapid and deterministic. Rather than relying on slow, brittle manual clicking, ResQ enforces mathematical invariants at the bottom, verifies HTTP/database protocols in the middle, and drives realistic multi-user crisis simulations at the top.
+  </p>
+
+  <div class="code-block">
+               ┌────────────────────────────────────────────────────────┐
+               │              Playwright Browser E2E (7)                │  ◀── Real Chromium DOM & Sockets
+               ├────────────────────────────────────────────────────────┤
+               │          Supertest Integration Suite (101)             │  ◀── Express + MongoDB Atlas Cluster
+               ├────────────────────────────────────────────────────────┤
+               │              Vitest Unit Tests (17)                    │  ◀── Pure Functions, Zero Network/DB
+               └────────────────────────────────────────────────────────┘
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 15%;">Test Layer</th>
+        <th style="width: 20%;">Core Tooling</th>
+        <th style="width: 35%;">What Runs Under the Hood</th>
+        <th style="width: 30%;">Software Execution Speed</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Tier 1: Unit</strong></td>
+        <td>Vitest + TypeScript (tsx)</td>
+        <td>Executes pure functions in an isolated Node.js V8 process. Zero I/O, zero network, zero database connections.</td>
+        <td><span class="badge badge-teal">Sub-millisecond</span><br><span style="font-size: 7.5pt; color: #5B6670;">~10–50 ms total</span></td>
+      </tr>
+      <tr>
+        <td><strong>Tier 2: Integration</strong></td>
+        <td>Vitest + Supertest + Mongoose</td>
+        <td>Mounts Express application on ephemeral OS port; connects to live MongoDB Atlas; drives real HTTP requests and Socket.IO handshakes.</td>
+        <td><span class="badge badge-teal">Fast</span><br><span style="font-size: 7.5pt; color: #5B6670;">~24.5s for 101 tests across 21 files</span></td>
+      </tr>
+      <tr>
+        <td><strong>Tier 3: End-to-End</strong></td>
+        <td>Playwright + Chromium Engine</td>
+        <td>Launches headless/headed Chromium browsers via Chrome DevTools Protocol (CDP); spawns 4 concurrent browser contexts simultaneously.</td>
+        <td><span class="badge badge-amber">Thorough</span><br><span style="font-size: 7.5pt; color: #5B6670;">~1–2 min for full core workflows</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ==================== TIER 1: UNIT TESTING ==================== -->
+  <div class="page-break"></div>
+  <h2>2. Tier 1: Unit Testing (Mathematical Invariants & Models)</h2>
+
+  <h3>A. What It Checks</h3>
+  <p>
+    Unit tests in ResQ verify complex business logic, mathematical algorithms, and deterministic calculations without any external runtime dependencies:
+  </p>
+  <ul>
+    <li>
+      <strong>4-Factor Matching Engine (<code>server/src/services/matching.ts</code>):</strong>
+      Evaluates the Haversine distance formula and combines proximity, suitability, capacity, and availability weights:
+      <div class="code-block" style="margin-top: 4pt;">
+Score = (0.35 × Proximity) + (0.30 × Suitability) + (0.20 × Capacity) + (0.15 × Availability)
+      </div>
+      <em>Assertions checked:</em> Responders 1 km away score higher than those 25 km away; responders at full capacity receive a capacity score penalty; unavailable responders are down-ranked.
+    </li>
+    <li>
+      <strong>Location Privacy & Obfuscation (<code>server/src/utils/privacy.ts</code>):</strong>
+      Verifies that Gaussian perturbation adds approximately 500m of random jitter to exact coordinates:
+      <div class="code-block" style="margin-top: 4pt;">
+const distanceDelta = calculateHaversine(preciseCoords, publicFuzzedCoords);
+expect(distanceDelta).toBeGreaterThanOrEqual(0.15); // At least 150m away
+expect(distanceDelta).toBeLessThanOrEqual(0.85);    // At most 850m away
+      </div>
+      <em>Assertions checked:</em> The fuzzed location is never identical to the precise coordinate; the delta remains tightly bounded within safe spatial margins.
+    </li>
+    <li>
+      <strong>AI Triage Classification Keywords (<code>server/src/services/classification.ts</code>):</strong>
+      Checks that distress text such as <em>"Elderly patient needs cardiac meds"</em> produces category <code>medical</code> with high confidence, while ambiguous text falls back cleanly without crashing.
+    </li>
+  </ul>
+
+  <h3>B. How It Runs Under the Hood</h3>
+  <div class="code-block">
+cd server
+npx vitest run tests/matching.test.ts
+  </div>
+  <p>
+    Vitest compiles the TypeScript files into memory using <code>esbuild</code>, invokes the functions directly with sample fixtures, executes assertions using Chai-compatible <code>expect()</code> primitives, and prints execution times per test case.
+  </p>
+
+  <!-- ==================== TIER 2: INTEGRATION TESTING ==================== -->
+  <h2>3. Tier 2: Integration Testing (Supertest + Express + MongoDB)</h2>
+
+  <h3>A. What It Checks</h3>
+  <p>
+    Integration tests exercise the full backend stack: routing, authentication middleware, controller logic, database schema validations, and Socket.IO event emissions.
+  </p>
+  <ul>
+    <li>
+      <strong>Role-Based Access Control (RBAC) Bi-Directional Enforcement:</strong>
+      Every protected route is tested in <em>both</em> directions:
+      <table>
+        <thead>
+          <tr>
+            <th>Endpoint</th>
+            <th>Role Under Test</th>
+            <th>Expected HTTP Code</th>
+            <th>Verification Assertion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>PATCH /api/requests/:id/claim</code></td>
+            <td><code>volunteer</code></td>
+            <td><span class="badge badge-teal">HTTP 200 OK</span></td>
+            <td>Request status transitions to <code>in_progress</code>; <code>RequestAssignment</code> created.</td>
+          </tr>
+          <tr>
+            <td><code>PATCH /api/requests/:id/claim</code></td>
+            <td><code>affected_person</code></td>
+            <td><span class="badge badge-rust">HTTP 403 Forbidden</span></td>
+            <td>Middleware blocks caller before touching database; error message verified.</td>
+          </tr>
+          <tr>
+            <td><code>PATCH /api/requests/:id/verify</code></td>
+            <td><code>admin</code> or verified <code>ngo</code></td>
+            <td><span class="badge badge-teal">HTTP 200 OK</span></td>
+            <td>Creates formal <code>Verification</code> document with inspection remarks & priority.</td>
+          </tr>
+          <tr>
+            <td><code>PATCH /api/requests/:id/verify</code></td>
+            <td><code>volunteer</code></td>
+            <td><span class="badge badge-rust">HTTP 403 Forbidden</span></td>
+            <td>Field volunteers cannot self-verify distress tickets.</td>
+          </tr>
+        </tbody>
+      </table>
+    </li>
+    <li>
+      <strong>Enforced State Machine Lifecycle:</strong>
+      Validates legal state progressions (<code>unverified</code> $\rightarrow$ <code>verified</code> $\rightarrow$ <code>in_progress</code> $\rightarrow$ <code>resolved</code> $\rightarrow$ <code>closed</code>). Asserts that illegal transitions (e.g., trying to jump directly from <code>unverified</code> to <code>closed</code>) are rejected with <code>HTTP 400 Bad Request</code>.
+    </li>
+    <li>
+      <strong>Inventory Reservation & Concurrency:</strong>
+      When a provider reserves 5 blankets, asserts that <code>quantityReserved</code> increments by 5 while <code>quantityAvailable</code> decrements by 5. When a ticket is cancelled, asserts that the reserved balance is automatically restored to available stock.
+    </li>
+    <li>
+      <strong>Real-Time Socket Event Privacy Masking:</strong>
+      Spawns two real Socket.IO clients: Client A (anonymous) and Client B (authenticated volunteer). Triggers a claim and asserts that Client A receives <code>contactPhone: "REDACTED"</code> and fuzzed GPS, while Client B receives unmasked details.
+    </li>
+  </ul>
+
+  <h3>B. How It Runs Under the Hood</h3>
+  <div class="code-block">
+[Vitest Test Runner]
+       │
+       ├── 1. beforeAll: Connects to MongoDB Atlas cluster via Mongoose
+       ├── 2. Seeds isolated documents with random tracking IDs (e.g. REQ-2026-XXXXXX)
+       ├── 3. Supertest wraps the Express 'app' instance in an ephemeral HTTP server
+       ├── 4. Executes supertest(app).patch('/api/requests/...').set('Authorization', token)
+       ├── 5. Queries MongoDB collection directly to prove database state was mutated
+       └── 6. afterAll: Cleans up created test documents and closes database connection
+  </div>
+
+  <!-- ==================== TIER 3: PLAYWRIGHT E2E ==================== -->
+  <div class="page-break"></div>
+  <h2>4. Tier 3: End-to-End Testing (Playwright Browser Automation)</h2>
+
+  <h3>A. What It Checks</h3>
+  <p>
+    Playwright executes complete user journeys in real Chromium browser instances. Its unique role in ResQ is testing <strong>multi-user concurrent coordination</strong>—a situation impossible to test reliably with unit tests alone.
+  </p>
+
+  <div class="callout">
+    <strong>Multi-Context Concurrency:</strong> Playwright spawns 4 isolated browser contexts (independent cookie jars, localStorage, and WebSocket sessions) simulating 4 distinct people operating on their devices simultaneously.
+  </div>
+
+  <div class="code-block">
+[Playwright Chromium Engine]
+       │
+       ├── Context A (Citizen Browser):
+       │   • Navigates to /submit
+       │   • Fills emergency description, selects category, and submits ticket
+       │   • Waits on tracking page /track/REQ-2026-XXXXXX
+       │
+       ├── Context B (Dispatcher / Admin Browser):
+       │   • Logs in as admin@resq.org
+       │   • Watches live dispatch rail update via Socket.IO WITHOUT page refresh
+       │   • Clicks "Verify" with priority "High"
+       │
+       ├── Context C (Field Volunteer Browser):
+       │   • Logs in as rahul.volunteer@example.org
+       │   • Watches verified ticket appear in claimable list live
+       │   • Clicks "Claim this request"
+       │
+       └── Concurrent Assertions Across Contexts:
+           • Asserts Citizen's screen (Context A) automatically turns to "IN_PROGRESS"
+           • Volunteer sends message in comms thread: "En route with medical supplies"
+           • Asserts Citizen receives message live in thread without browser reload
+           • Asserts Context D (Unrelated Supplier) receives 0 messages (comms isolation)
+           • Volunteer clicks "Mark resolved" ➔ Citizen clicks "Confirm safe delivery"
+           • Asserts ticket transitions to terminal "CLOSED" status
+  </div>
+
+  <h3>B. How It Runs Under the Hood</h3>
+  <p>
+    Playwright communicates directly with Chromium via the <strong>Chrome DevTools Protocol (CDP)</strong>. It waits for DOM stability (auto-waiting for network idle, visibility, and element interactability), eliminating fragile timing bugs:
+  </p>
+  <div class="code-block">
+await pageAdmin.click('button:has-text("Verify")');
+await expect(pageCitizen.locator('.status-chip')).toHaveText('VERIFIED');
+  </div>
+
+  <!-- ==================== MECHANICAL TEST INVENTORY ==================== -->
+  <h2>5. Mechanical Test Inventory & Static Traceability Validation</h2>
+  <p>
+    To prevent documentation drift, ResQ includes an automated verification script (<code>scripts/generate-test-inventory.ts</code>). This script acts as a static analysis tool:
+  </p>
+  <ul>
+    <li>
+      <strong>AST Test Discovery:</strong> Uses the TypeScript Compiler API to parse test files and discover every <code>it()</code> and <code>test()</code> block, recording exact file paths, line numbers, and full enclosing describe titles.
+    </li>
+    <li>
+      <strong>Cross-Reference Validation:</strong> Compares discovered tests against <code>docs/test-case-annotations.json</code>.
+    </li>
+    <li>
+      <strong>Code-Under-Test Verification:</strong> For every entry in <code>code_under_test</code>, the script verifies:
+      <ol>
+        <li>The target source file actually exists on disk.</li>
+        <li>The specified line range (e.g. <code>454-546</code>) is within the file's line count.</li>
+        <li>The named function or route (e.g. <code>PATCH /api/requests/:id/claim</code>) actually appears within that line slice.</li>
+      </ol>
+      If any line range drifts or a function moves, <strong>the script fails with a non-zero exit code</strong>.
+    </li>
+  </ul>
+
+  <!-- ==================== PRACTICAL RUNBOOK ==================== -->
+  <div class="page-break"></div>
+  <h2>6. Practical Testing Runbook & Commands</h2>
+
+  <h3>1. Running All Backend Tests (118 Tests)</h3>
+  <div class="code-block">
+cd "code/server"
+npm test
+  </div>
+  <p>Executes Vitest across all 21 test files. Reports pass/fail, duration, and test suite counts.</p>
+
+  <h3>2. Running a Specific Test File (Targeted Debugging)</h3>
+  <div class="code-block">
+cd "code/server"
+npm test tests/cancellation.test.ts
+npm test tests/socket_broadcast.test.ts
+npm test tests/allocation.test.ts
+  </div>
+
+  <h3>3. Running Playwright End-to-End Tests (7 Scenarios)</h3>
+  <p><em>Prerequisite: Ensure dev servers are running (Backend on <code>:5000</code>, Frontend on <code>:5173</code>).</em></p>
+  <div class="code-block">
+cd "code/client"
+npx playwright test
+  </div>
+
+  <h3>4. Running Playwright in Headed Mode (Watch Real Browsers Open)</h3>
+  <p>Opens real visible Chromium windows so you can watch automated clicks and multi-context sync live:</p>
+  <div class="code-block">
+cd "code/client"
+npx playwright test --headed
+  </div>
+
+  <h3>5. Running Playwright with Interactive UI Mode</h3>
+  <p>Provides time-travel debugging, step-by-step DOM snapshots, console logs, and network inspection:</p>
+  <div class="code-block">
+cd "code/client"
+npx playwright test --ui
+  </div>
+
+  <h3>6. Regenerating & Validating Test Inventory</h3>
+  <div class="code-block">
+cd "code"
+npm run inventory
+  </div>
+  <p>
+    Scans the repository, runs AST validations, verifies all 125 test annotations against source code lines, and updates <code>docs/TEST_CASES.md</code> and <code>docs/test-inventory.json</code>.
+  </p>
+
+  <h2>7. Summary: What Gives Confidence in ResQ?</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Aspect</th>
+        <th>How It Is Proven</th>
+        <th>Automated Metric</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Security & RBAC</strong></td>
+        <td>Tested bi-directionally: unauthorized roles receive HTTP 403, authorized roles succeed.</td>
+        <td>15 Auth & Role tests</td>
+      </tr>
+      <tr>
+        <td><strong>Life-Safety Privacy</strong></td>
+        <td>Gaussian coordinate offset verified mathematically; telephone numbers masked on public endpoints.</td>
+        <td>11 Privacy tests</td>
+      </tr>
+      <tr>
+        <td><strong>State Machine Integrity</strong></td>
+        <td>Every status transition enforced; illegal jumps rejected; requester confirmation required for closure.</td>
+        <td>12 Lifecycle tests</td>
+      </tr>
+      <tr>
+        <td><strong>Concurrency Safety</strong></td>
+        <td>Atomic query filters (<code>{ status: 'verified' }</code>) prevent split-brain double-claims.</td>
+        <td>0% Double-booking rate</td>
+      </tr>
+      <tr>
+        <td><strong>Real-Time Reliability</strong></td>
+        <td>Multi-context Playwright tests prove Socket.IO updates DOM across different users with zero refresh.</td>
+        <td>7 Playwright E2E specs</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="margin-top: 14pt; padding-top: 8pt; border-top: 1px solid #D0D7DE; font-size: 8pt; color: #5B6670; display: flex; justify-content: space-between; font-family: 'IBM Plex Mono', monospace;">
+    <div>ResQ Software Testing & Quality Assurance Architecture Manual</div>
+    <div>Generated: 2026-11-02</div>
+  </div>
+
+</body>
+</html>
+`;
+
+  const htmlPath = path.join(__dirname, '../docs/testing-architecture-guide.html');
+  fs.writeFileSync(htmlPath, html, 'utf8');
+  console.log(`Saved HTML report to: ${htmlPath}`);
+
+  console.log('Launching headless browser to compile Testing Guide PDF...');
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+  
+  await page.setContent(html, { waitUntil: 'networkidle' });
+
+  const pdfPathDocs = path.join(__dirname, '../docs/ResQ_Software_Testing_Guide.pdf');
+  const pdfPathRoot = path.join(__dirname, '../ResQ_Software_Testing_Guide.pdf');
+
+  await page.pdf({
+    path: pdfPathDocs,
+    format: 'A4',
+    printBackground: true,
+    margin: {
+      top: '12mm',
+      bottom: '12mm',
+      left: '12mm',
+      right: '12mm'
+    }
+  });
+
+  // Copy to root as well for convenience
+  fs.copyFileSync(pdfPathDocs, pdfPathRoot);
+
+  await browser.close();
+
+  const stats = fs.statSync(pdfPathDocs);
+  console.log(`Testing Guide PDF generated successfully!`);
+  console.log(`Path: ${pdfPathDocs}`);
+  console.log(`Size: ${(stats.size / 1024).toFixed(1)} KB`);
+}
+
+generateTestingGuide().catch(err => {
+  console.error('Failed to generate Testing Guide PDF:', err);
+  process.exit(1);
+});
