@@ -265,7 +265,7 @@ export default function LocationPicker({
           type="button"
           onClick={handleManualGeolocate}
           disabled={isLocating}
-          className="font-mono text-xs text-ink hover:underline border border-slate-line px-2 py-1 rounded-[3px] bg-white cursor-pointer"
+          className="font-mono text-xs text-ink hover:underline border border-slate-line px-3 py-1.5 min-h-[36px] inline-flex items-center rounded-[3px] bg-white cursor-pointer"
         >
           {isLocating ? 'Acquiring GPS...' : 'Use current location'}
         </button>

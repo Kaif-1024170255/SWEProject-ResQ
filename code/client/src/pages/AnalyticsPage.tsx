@@ -122,14 +122,14 @@ export default function AnalyticsPage() {
 
           <Link
             to="/admin"
-            className="font-mono text-xs text-ink border border-slate-line px-3 py-1.5 rounded-[3px] hover:bg-paper"
+            className="font-mono text-xs text-ink border border-slate-line px-3 py-2 min-h-[38px] inline-flex items-center rounded-[3px] hover:bg-paper"
           >
             Dispatch Console
           </Link>
 
           <Link
             to="/organizations"
-            className="font-mono text-xs text-ink border border-slate-line px-3 py-1.5 rounded-[3px] hover:bg-paper"
+            className="font-mono text-xs text-ink border border-slate-line px-3 py-2 min-h-[38px] inline-flex items-center rounded-[3px] hover:bg-paper"
           >
             Organizations
           </Link>
@@ -137,14 +137,14 @@ export default function AnalyticsPage() {
           <button
             onClick={fetchAnalytics}
             disabled={isLoading}
-            className="font-mono text-xs text-ink border border-slate-line px-3 py-1.5 rounded-[3px] hover:bg-paper cursor-pointer disabled:opacity-50"
+            className="font-mono text-xs text-ink border border-slate-line px-3 py-2 min-h-[38px] inline-flex items-center rounded-[3px] hover:bg-paper cursor-pointer disabled:opacity-50"
           >
             {isLoading ? 'Refreshing...' : 'Refresh Readout'}
           </button>
 
           <button
             onClick={logout}
-            className="bg-transparent text-ink font-sans text-xs font-semibold px-3.5 py-1.5 rounded-[3px] border border-slate-line hover:border-ink cursor-pointer"
+            className="bg-transparent text-ink font-sans text-xs font-semibold px-3.5 py-2 min-h-[38px] inline-flex items-center rounded-[3px] border border-slate-line hover:border-ink cursor-pointer"
           >
             Log out
           </button>

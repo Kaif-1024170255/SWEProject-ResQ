@@ -58,28 +58,28 @@ export default function DashboardPage() {
 
           <Link
             to="/organizations"
-            className="font-mono text-xs text-ink border border-slate-line px-3 py-1.5 rounded-[3px] hover:bg-paper"
+            className="font-mono text-xs text-ink border border-slate-line px-3 py-2 min-h-[38px] inline-flex items-center rounded-[3px] hover:bg-paper"
           >
             Organizations
           </Link>
 
           <Link
             to="/track"
-            className="font-mono text-xs text-ink border border-slate-line px-3 py-1.5 rounded-[3px] hover:bg-paper"
+            className="font-mono text-xs text-ink border border-slate-line px-3 py-2 min-h-[38px] inline-flex items-center rounded-[3px] hover:bg-paper"
           >
             Track request
           </Link>
 
           <Link
             to="/submit"
-            className="bg-ink text-white font-sans text-xs font-semibold px-3.5 py-1.5 rounded-[3px] hover:bg-ink-soft cursor-pointer"
+            className="bg-ink text-white font-sans text-xs font-semibold px-3.5 py-2 min-h-[38px] inline-flex items-center rounded-[3px] hover:bg-ink-soft cursor-pointer"
           >
             Report emergency
           </Link>
 
           <button
             onClick={logout}
-            className="bg-transparent text-ink font-sans text-xs font-semibold px-3.5 py-1.5 rounded-[3px] border border-slate-line hover:border-ink cursor-pointer"
+            className="bg-transparent text-ink font-sans text-xs font-semibold px-3.5 py-2 min-h-[38px] inline-flex items-center rounded-[3px] border border-slate-line hover:border-ink cursor-pointer"
           >
             Log out
           </button>

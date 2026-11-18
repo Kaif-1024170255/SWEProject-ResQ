@@ -223,24 +223,24 @@ export default function TrackRequestPage() {
           </h1>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Link
             to="/submit"
-            className="font-mono text-xs text-ink border border-slate-line px-3 py-1.5 rounded-[3px] hover:bg-paper"
+            className="font-mono text-xs text-ink border border-slate-line px-3.5 py-2 min-h-[38px] inline-flex items-center rounded-[3px] hover:bg-paper"
           >
             Submit new request
           </Link>
           {user ? (
             <Link
               to="/dashboard"
-              className="font-mono text-xs text-ink border border-slate-line px-3 py-1.5 rounded-[3px] hover:bg-paper"
+              className="font-mono text-xs text-ink border border-slate-line px-3.5 py-2 min-h-[38px] inline-flex items-center rounded-[3px] hover:bg-paper"
             >
               Console
             </Link>
           ) : (
             <Link
               to="/login"
-              className="font-mono text-xs text-ink border border-slate-line px-3 py-1.5 rounded-[3px] hover:bg-paper"
+              className="font-mono text-xs text-ink border border-slate-line px-3.5 py-2 min-h-[38px] inline-flex items-center rounded-[3px] hover:bg-paper"
             >
               Responder login
             </Link>

@@ -395,7 +395,7 @@ export default function SubmitRequestPage() {
                   <button
                     type="button"
                     onClick={() => setIsSuggestionDismissed(true)}
-                    className="text-slate hover:text-ink text-sm px-1.5 cursor-pointer font-sans leading-none"
+                    className="text-slate hover:text-ink text-sm w-7 h-7 flex items-center justify-center cursor-pointer font-sans leading-none shrink-0"
                     title="Dismiss suggestion"
                   >
                     ×
@@ -466,7 +466,7 @@ export default function SubmitRequestPage() {
                   type="button"
                   onClick={handleAddSupplyItem}
                   disabled={catalogResources.length === 0}
-                  className="font-mono text-xs px-3 py-1.5 bg-paper-raised text-ink border border-slate-line hover:border-ink cursor-pointer uppercase shrink-0 disabled:opacity-50 self-start sm:self-auto"
+                  className="font-mono text-xs px-3.5 py-2 min-h-[38px] inline-flex items-center bg-paper-raised text-ink border border-slate-line hover:border-ink cursor-pointer uppercase shrink-0 disabled:opacity-50 self-start sm:self-auto"
                 >
                   + Add needed supply
                 </button>

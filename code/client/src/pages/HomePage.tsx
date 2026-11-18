@@ -158,16 +158,16 @@ export default function HomePage() {
             </span>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 text-xs">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
             <Link
               to="/track"
-              className="font-mono text-slate hover:text-ink px-2.5 py-1.5 border border-slate-line rounded-[3px] hover:bg-paper"
+              className="font-mono text-slate hover:text-ink px-3 py-2 min-h-[38px] inline-flex items-center border border-slate-line rounded-[3px] hover:bg-paper"
             >
               Track request
             </Link>
             <Link
               to="/submit"
-              className="font-sans font-semibold text-white bg-rust hover:bg-rust/90 px-3 py-1.5 rounded-[3px]"
+              className="font-sans font-semibold text-white bg-rust hover:bg-rust/90 px-3.5 py-2 min-h-[38px] inline-flex items-center rounded-[3px]"
             >
               Report an emergency
             </Link>
@@ -179,13 +179,13 @@ export default function HomePage() {
                 </span>
                 <button
                   onClick={() => navigate(consolePath)}
-                  className="font-sans font-semibold text-white bg-ink hover:bg-ink-soft px-3 py-1.5 rounded-[3px] cursor-pointer"
+                  className="font-sans font-semibold text-white bg-ink hover:bg-ink-soft px-3.5 py-2 min-h-[38px] inline-flex items-center rounded-[3px] cursor-pointer"
                 >
                   Open console
                 </button>
                 <button
                   onClick={logout}
-                  className="font-mono text-slate hover:text-ink px-2 py-1 cursor-pointer"
+                  className="font-mono text-slate hover:text-ink px-2.5 py-2 min-h-[38px] inline-flex items-center cursor-pointer"
                   title="Sign out"
                 >
                   Sign out
@@ -194,7 +194,7 @@ export default function HomePage() {
             ) : (
               <Link
                 to="/login"
-                className="font-sans font-semibold text-ink bg-paper border border-slate-line hover:bg-paper-raised px-3 py-1.5 rounded-[3px]"
+                className="font-sans font-semibold text-ink bg-paper border border-slate-line hover:bg-paper-raised px-3.5 py-2 min-h-[38px] inline-flex items-center rounded-[3px]"
               >
                 Log in
               </Link>
