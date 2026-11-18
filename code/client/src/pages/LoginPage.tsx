@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth, AuthUser } from '../context/AuthContext';
+import { ServerColdStartNotice, useColdStartDelay } from '../components/ServerColdStartNotice';
 
 interface DemoAccount {
   role: string;
@@ -101,6 +102,7 @@ export default function LoginPage() {
   const [quickLoginRole, setQuickLoginRole] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [formFeedback, setFormFeedback] = useState<string | null>(null);
+  const isWakingServer = useColdStartDelay(isSubmitting, 2000);
 
   const authenticateWith = async (loginEmail: string, loginPassword: string) => {
     setErrorMessage(null);
@@ -251,6 +253,12 @@ export default function LoginPage() {
               {isSubmitting && !quickLoginRole ? 'Verifying credentials...' : 'Log in'}
             </button>
           </div>
+
+          {isWakingServer && (
+            <div className="pt-1">
+              <ServerColdStartNotice />
+            </div>
+          )}
         </form>
 
         <div className="mt-6 pt-4 border-t border-slate-line flex items-center justify-between text-xs text-slate">

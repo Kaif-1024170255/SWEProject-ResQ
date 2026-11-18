@@ -2,6 +2,7 @@ import { useState, useEffect, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LocationPicker from '../components/LocationPicker';
+import { ServerColdStartNotice, useColdStartDelay } from '../components/ServerColdStartNotice';
 
 interface DynamicCategory {
   _id: string;
@@ -50,6 +51,7 @@ export default function SubmitRequestPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successData, setSuccessData] = useState<SubmissionSuccessData | null>(null);
+  const isWakingServer = useColdStartDelay(isSubmitting, 2000);
 
   // Decoupled AI classification suggestion state
   const [suggestion, setSuggestion] = useState<{
@@ -533,6 +535,12 @@ export default function SubmitRequestPage() {
                 {isSubmitting ? 'Logging request...' : 'Submit emergency request'}
               </button>
             </div>
+
+            {isWakingServer && (
+              <div className="pt-2 max-w-lg">
+                <ServerColdStartNotice />
+              </div>
+            )}
           </form>
         </div>
       )}

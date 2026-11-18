@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ServerColdStartNotice, useColdStartDelay } from './components/ServerColdStartNotice';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
@@ -14,13 +15,19 @@ import ErrorBoundary from './components/ErrorBoundary';
 
 function ConsoleRedirect() {
   const { user, isLoading } = useAuth();
+  const isWakingServer = useColdStartDelay(isLoading, 2000);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-paper">
-        <div className="font-mono text-xs text-slate uppercase tracking-wider">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-paper px-4">
+        <div className="font-mono text-xs text-slate uppercase tracking-wider mb-4">
           Initializing resQ Console...
         </div>
+        {isWakingServer && (
+          <div className="max-w-md w-full">
+            <ServerColdStartNotice />
+          </div>
+        )}
       </div>
     );
   }
