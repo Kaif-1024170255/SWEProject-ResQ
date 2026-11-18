@@ -14,6 +14,9 @@
     "inventory": "tsx ../scripts/generate-test-inventory.ts",
     "test": "vitest run"
   },
+  "engines": {
+    "node": "^24.0.0"
+  },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
@@ -36,7 +39,7 @@
     "socket.io-client": "^4.8.3",
     "supertest": "^7.0.0",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2",
+    "typescript": "~5.7.2",
     "vitest": "^2.1.8"
   }
 }
