@@ -147,18 +147,9 @@ export default function LoginPage() {
     await authenticateWith(email, password);
   };
 
-  const handleQuickLogin = async (demoAccount: DemoAccount) => {
+  const handleSelectAccount = (demoAccount: DemoAccount) => {
     setEmail(demoAccount.email);
-    setPassword('ResQSecure2026!');
-    setQuickLoginRole(demoAccount.role);
-    setFormFeedback(null);
-    await authenticateWith(demoAccount.email, 'ResQSecure2026!');
-  };
-
-  const handleFillForm = (demoAccount: DemoAccount) => {
-    setEmail(demoAccount.email);
-    setPassword('ResQSecure2026!');
-    setFormFeedback(`Filled ${demoAccount.roleBadge} credentials (${demoAccount.email}) into login form above.`);
+    setFormFeedback(`Selected ${demoAccount.roleBadge} account (${demoAccount.email}). Please enter your password above.`);
     // Smooth scroll to top form
     const formElement = document.getElementById('login-form-card');
     if (formElement) {
@@ -279,25 +270,21 @@ export default function LoginPage() {
           <div className="font-mono text-xs text-ink font-semibold uppercase tracking-wider">
             Demo Accounts By Role
           </div>
-          <div className="font-mono text-[11px] text-slate">
-            Password: <span className="text-ink font-semibold">ResQSecure2026!</span>
+          <div className="font-mono text-[11px] text-slate italic">
+            Passwords provisioned securely on backend
           </div>
         </div>
 
-        {/* Clear Explanation of Buttons */}
+        {/* Clear Explanation */}
         <div className="mb-4 p-2.5 bg-paper border border-slate-line text-[11px] text-slate space-y-1 font-mono">
-          <div className="text-ink font-semibold">HOW THESE DEMO CONTROLS WORK:</div>
+          <div className="text-ink font-semibold">ROLE ACCESS SELECTION:</div>
           <div>
-            <span className="text-ink font-semibold">• Quick Login:</span> Authenticates immediately with 1 click and opens that role's interface (/admin or /dashboard).
-          </div>
-          <div>
-            <span className="text-ink font-semibold">• Fill Form:</span> Populates the email and password inputs above and scrolls up so you can inspect credentials or test manual submission.
+            Click <span className="text-ink font-semibold">Select Account</span> to populate the email address in the form above, then sign in with the password provisioned for this deployment.
           </div>
         </div>
 
         <div className="space-y-3">
           {DEMO_ACCOUNTS.map((acc) => {
-            const isLoggingIn = isSubmitting && quickLoginRole === acc.role;
             return (
               <div
                 key={acc.role}
@@ -322,20 +309,11 @@ export default function LoginPage() {
                   <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
                     <button
                       type="button"
-                      onClick={() => handleFillForm(acc)}
-                      title="Populate email and password in the login form above"
-                      className="font-mono text-[11px] text-slate hover:text-ink px-2.5 py-1 border border-slate-line rounded-[3px] hover:bg-paper cursor-pointer bg-white"
+                      onClick={() => handleSelectAccount(acc)}
+                      title="Populate email in the login form above"
+                      className="font-mono text-[11px] font-semibold text-ink px-3 py-1 border border-slate-line rounded-[3px] hover:bg-paper hover:border-ink cursor-pointer bg-white"
                     >
-                      Fill Form
-                    </button>
-                    <button
-                      type="button"
-                      disabled={isSubmitting}
-                      onClick={() => handleQuickLogin(acc)}
-                      title="Log in immediately as this role"
-                      className="font-mono text-[11px] font-semibold px-2.5 py-1 bg-ink text-white rounded-[3px] hover:bg-ink-soft disabled:opacity-50 cursor-pointer"
-                    >
-                      {isLoggingIn ? 'Logging in...' : 'Quick Login'}
+                      Select Account
                     </button>
                   </div>
                 </div>

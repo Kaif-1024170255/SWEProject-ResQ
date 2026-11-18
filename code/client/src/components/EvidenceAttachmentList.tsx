@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, FormEvent, ChangeEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { apiUrl } from '../services/api';
 
 export interface EvidenceItem {
   _id: string;
@@ -61,6 +62,8 @@ export default function EvidenceAttachmentList({ requestId }: EvidenceAttachment
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [openingId, setOpeningId] = useState<string | null>(null);
 
   const fetchEvidence = useCallback(async () => {
     if (!requestId) return;
@@ -68,7 +71,14 @@ export default function EvidenceAttachmentList({ requestId }: EvidenceAttachment
     setFetchError(null);
 
     try {
-      const res = await fetch(`/api/requests/${encodeURIComponent(requestId)}/evidence`);
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch(`/api/requests/${encodeURIComponent(requestId)}/evidence`, {
+        headers,
+      });
       const data = await res.json();
 
       if (!res.ok) {
@@ -81,7 +91,78 @@ export default function EvidenceAttachmentList({ requestId }: EvidenceAttachment
     } finally {
       setIsLoading(false);
     }
-  }, [requestId]);
+  }, [requestId, token]);
+
+  const handleDeleteEvidence = async (evidenceId: string) => {
+    if (!token) return;
+    if (!window.confirm('Are you sure you want to delete this evidence attachment?')) return;
+
+    setDeletingId(evidenceId);
+    setUploadError(null);
+    setUploadSuccess(null);
+
+    try {
+      const res = await fetch(
+        `/api/requests/${encodeURIComponent(requestId)}/evidence/${encodeURIComponent(evidenceId)}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to delete evidence attachment.');
+      }
+
+      setUploadSuccess('Evidence attachment deleted successfully.');
+      await fetchEvidence();
+    } catch (err: unknown) {
+      setUploadError(err instanceof Error ? err.message : 'Failed to delete evidence.');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleOpenFile = async (item: EvidenceItem) => {
+    setOpeningId(item._id);
+    setUploadError(null);
+
+    try {
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch(apiUrl(item.fileUrl), { headers });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to download evidence file.');
+      }
+
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const newWindow = window.open(blobUrl, '_blank');
+      if (!newWindow) {
+        // Fallback for popup blocker: trigger direct download
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = item.fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+      setTimeout(() => {
+        window.URL.revokeObjectURL(blobUrl);
+      }, 60000);
+    } catch (err: unknown) {
+      setUploadError(err instanceof Error ? err.message : 'Failed to retrieve evidence file.');
+    } finally {
+      setOpeningId(null);
+    }
+  };
 
   useEffect(() => {
     fetchEvidence();
@@ -243,16 +324,28 @@ export default function EvidenceAttachmentList({ requestId }: EvidenceAttachment
                 )}
               </div>
 
-              {/* Action Button: Open / Download File */}
-              <div className="shrink-0 self-start sm:self-center">
-                <a
-                  href={item.fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block font-mono text-[11px] text-ink border border-slate-line px-3 py-1.5 bg-paper hover:bg-paper-raised hover:border-ink rounded-[2px] transition-colors"
+              {/* Action Buttons: Open / Download File via Authenticated Blob & Delete */}
+              <div className="shrink-0 self-start sm:self-center flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleOpenFile(item)}
+                  disabled={openingId === item._id}
+                  className="inline-block font-mono text-[11px] text-ink border border-slate-line px-3 py-1.5 bg-paper hover:bg-paper-raised hover:border-ink rounded-[2px] transition-colors disabled:opacity-50 cursor-pointer"
                 >
-                  Open file
-                </a>
+                  {openingId === item._id ? 'Opening...' : 'Open file'}
+                </button>
+
+                {Boolean(user && (user.role === 'admin' || (item.uploader && ((user as any)._id === item.uploader._id || (user as any).id === item.uploader._id)))) && (
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteEvidence(item._id)}
+                    disabled={deletingId === item._id}
+                    className="font-mono text-[11px] text-rust border border-slate-line px-2.5 py-1.5 bg-paper hover:bg-paper-raised hover:border-rust rounded-[2px] transition-colors disabled:opacity-50 cursor-pointer"
+                    title="Delete evidence attachment"
+                  >
+                    {deletingId === item._id ? 'Deleting...' : 'Delete'}
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -268,7 +361,7 @@ export default function EvidenceAttachmentList({ requestId }: EvidenceAttachment
                 id="evidence-file-input"
                 type="file"
                 onChange={handleFileChange}
-                accept="image/*,.pdf,.doc,.docx,.txt"
+                accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp,.pdf,application/pdf"
                 className="w-full text-xs font-mono text-slate file:mr-3 file:py-1.5 file:px-3 file:rounded-[2px] file:border file:border-slate-line file:bg-white file:text-ink file:font-sans file:text-xs file:font-semibold hover:file:border-ink cursor-pointer"
               />
             </div>

@@ -22,6 +22,7 @@ import {
 
 describe('Seed Script & End-to-End Phase 1 Integration Validation', () => {
   let mongoServer: MongoMemoryServer;
+  const testFixturePassword = 'test-seed-fixture-password-123';
 
   beforeAll(async () => {
     process.env.JWT_SECRET = 'test-super-secret-jwt-key-for-unit-testing';
@@ -36,7 +37,7 @@ describe('Seed Script & End-to-End Phase 1 Integration Validation', () => {
   });
 
   it('should seed all collections with the rich expanded dataset', async () => {
-    const seedResult = await seedDatabase();
+    const seedResult = await seedDatabase({ password: testFixturePassword });
 
     // 1. Users
     expect(seedResult.users.length).toBeGreaterThanOrEqual(5);
@@ -113,13 +114,13 @@ describe('Seed Script & End-to-End Phase 1 Integration Validation', () => {
     // Authenticate users
     const adminRes = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'admin@resq.org', password: 'ResQSecure2026!' });
+      .send({ email: 'admin@resq.org', password: testFixturePassword });
     expect(adminRes.status).toBe(200);
     const adminToken = adminRes.body.token;
 
     const volunteerRes = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'rahul.volunteer@example.org', password: 'ResQSecure2026!' });
+      .send({ email: 'rahul.volunteer@example.org', password: testFixturePassword });
     expect(volunteerRes.status).toBe(200);
     const volunteerToken = volunteerRes.body.token;
 

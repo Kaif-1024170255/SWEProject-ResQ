@@ -390,3 +390,74 @@ WHEN TO ASK ME FOR HELP (in addition to existing lists):
   Verify it in the code first; if the code does not settle it, ask me.
 
 ---
+
+PHASE 6 SCOPE: Deployment to free-tier hosting, demo account provisioning,
+mobile responsiveness, demo-day readiness. No new features, no schema
+changes — this phase makes what already exists reachable and presentable.
+
+DEFINITION OF DONE — same standard as prior phases, adapted for deployment:
+A deployment step is not complete when a build succeeds — it's complete when
+you've personally opened the LIVE deployed URL (not localhost) in a browser,
+logged in with a real demo account, and confirmed the feature actually works
+against the deployed backend and deployed database. A green build log is not
+evidence of a working live site.
+
+STILL FREE ONLY:
+- Frontend: Vercel or Netlify free tier. Backend: Render free web service
+  tier (or an equivalent free tier you confirm with me first). Database:
+  the existing MongoDB Atlas free M0 cluster.
+- Before creating any hosting account, tell me exactly what to sign up for
+  and wait for me to do it and hand you access/connect the repo — you
+  cannot create third-party accounts yourself.
+- Confirm current free-tier limits for whichever platform you use (cold-start
+  behavior, monthly hour limits, bandwidth caps) and tell me what they are
+  before we commit to a platform.
+
+SECRETS AND CREDENTIALS:
+- Never invent or hardcode a placeholder secret. For every environment
+  variable the deployed backend needs (MONGODB_URI, JWT_SECRET, and the
+  Gemini API key if AI classification stays enabled), tell me exactly what's
+  needed and where it goes (e.g. "paste this into Render's Environment tab
+  as JWT_SECRET"), and wait for me to confirm it's set — do not proceed as
+  if it's set until I say so.
+- Demo account passwords must be freshly generated for this deployment, not
+  reused from earlier local-only seed data. Give me the final credential
+  list directly in your response — do not commit it to any file that could
+  end up in a public GitHub repo.
+
+MOBILE — STILL FOLLOWS DESIGN_SYSTEM.md:
+- Every screen must be verified on an actual phone, not a resized desktop
+  browser window. Real touch targets, real viewport behavior, and real
+  network conditions surface problems a resized window won't.
+
+WHEN TO ASK ME FOR HELP (in addition to existing lists):
+- Creating and linking any hosting account, and connecting it to our GitHub
+  repo — this needs my login.
+- Setting real environment variables/secrets in the hosting platform's
+  dashboard — I do this, you tell me exactly what to enter and where.
+- Testing on a real phone — you can prepare what needs testing, but you
+  can't hold a physical device. Tell me what to check and I'll report back.
+- Whether to add a keep-warm mechanism for Render's free-tier cold starts,
+  versus just documenting a manual "wake it up before the demo" step —
+  propose both and let me choose (see Prompt 5).
+
+DEPLOYMENT FACTS TO RESPECT (Phase 6):
+- Render's free web service has an EPHEMERAL filesystem: anything written to
+  local disk (such as uploaded evidence files) is lost on every redeploy,
+  restart and spin-down, and Render may restart a free service at any time.
+  Do not rely on local disk for anything that must survive.
+- A free Render service spins down after 15 minutes without inbound traffic
+  and takes about a minute to wake. Any keep-warm ping must hit a real route
+  such as the health endpoint, not robots.txt.
+- Anything held only in memory (for example the real-time propagation
+  latency samples) resets whenever the service restarts. Do not describe such
+  figures as persistent.
+- The address-search feature calls OpenStreetMap's Nominatim from the
+  backend. Keep the descriptive User-Agent and the 1 request per second
+  limit. After deploying, test it from the live backend. If Nominatim
+  refuses requests from the hosting provider, the form must still work with
+  the map pin and current location, and you must tell me.
+- Nothing private may be committed: no .env files, no credential lists, no
+  pilot export containing phone numbers, no real API keys.
+
+---

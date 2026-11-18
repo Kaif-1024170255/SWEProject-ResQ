@@ -26,6 +26,7 @@ async function requestJson(options: http.RequestOptions, body?: any): Promise<{ 
 }
 
 async function runSanityCheck() {
+  const demoPassword = process.env.DEMO_USER_PASSWORD || process.env.DEMO_PASSWORD || 'test-local-password';
   console.log('=== RESQ END-TO-END SANITY WALKTHROUGH ===\n');
 
   // 1. Check Frontend Home Page
@@ -79,7 +80,7 @@ async function runSanityCheck() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     },
-    { email: 'admin@resq.org', password: 'ResQSecure2026!' }
+    { email: 'admin@resq.org', password: demoPassword }
   );
   if (adminLogin.status !== 200) {
     throw new Error(`Admin login failed: ${JSON.stringify(adminLogin.data)}`);
@@ -127,7 +128,7 @@ async function runSanityCheck() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     },
-    { email: 'rahul.volunteer@example.org', password: 'ResQSecure2026!' }
+    { email: 'rahul.volunteer@example.org', password: demoPassword }
   );
   if (volunteerLogin.status !== 200) {
     throw new Error(`Volunteer login failed: ${JSON.stringify(volunteerLogin.data)}`);

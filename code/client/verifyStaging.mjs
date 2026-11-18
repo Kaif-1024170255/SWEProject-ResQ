@@ -1,6 +1,7 @@
 import { chromium } from '@playwright/test';
 
 async function verifyBrowserViews() {
+  const demoPassword = process.env.DEMO_USER_PASSWORD || process.env.DEMO_PASSWORD || 'test-local-password';
   console.log('Launching browser to verify staging environment...');
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
@@ -8,7 +9,7 @@ async function verifyBrowserViews() {
   // Test 1: Admin & Analytics
   await page.goto('http://localhost:5173/login');
   await page.fill('input[type="email"]', 'admin@resq.org');
-  await page.fill('input[type="password"]', 'ResQSecure2026!');
+  await page.fill('input[type="password"]', demoPassword);
   await page.click('button[type="submit"]');
   await page.waitForURL('**/admin');
   console.log('✓ 1. Admin account logged in successfully -> URL:', page.url());
@@ -36,7 +37,7 @@ async function verifyBrowserViews() {
   // Test 3: Affected Person (Citizen)
   await page.goto('http://localhost:5173/login');
   await page.fill('input[type="email"]', 'amrita.devi@example.org');
-  await page.fill('input[type="password"]', 'ResQSecure2026!');
+  await page.fill('input[type="password"]', demoPassword);
   await page.click('button[type="submit"]');
   await page.waitForURL('**/dashboard');
   const roleText1 = await page.locator('text=/ROLE MODE:.*/').innerText();
@@ -45,7 +46,7 @@ async function verifyBrowserViews() {
   // Test 4: Volunteer
   await page.goto('http://localhost:5173/login');
   await page.fill('input[type="email"]', 'rahul.volunteer@example.org');
-  await page.fill('input[type="password"]', 'ResQSecure2026!');
+  await page.fill('input[type="password"]', demoPassword);
   await page.click('button[type="submit"]');
   await page.waitForURL('**/dashboard');
   const roleText2 = await page.locator('text=/ROLE MODE:.*/').innerText();
@@ -54,7 +55,7 @@ async function verifyBrowserViews() {
   // Test 5: NGO Coordinator
   await page.goto('http://localhost:5173/login');
   await page.fill('input[type="email"]', 'dispatch@punjabrelief.org');
-  await page.fill('input[type="password"]', 'ResQSecure2026!');
+  await page.fill('input[type="password"]', demoPassword);
   await page.click('button[type="submit"]');
   await page.waitForURL('**/dashboard');
   const roleText3 = await page.locator('text=/ROLE MODE:.*/').innerText();
@@ -63,7 +64,7 @@ async function verifyBrowserViews() {
   // Test 6: Resource Provider
   await page.goto('http://localhost:5173/login');
   await page.fill('input[type="email"]', 'logistics@ludhianamedical.org');
-  await page.fill('input[type="password"]', 'ResQSecure2026!');
+  await page.fill('input[type="password"]', demoPassword);
   await page.click('button[type="submit"]');
   await page.waitForURL('**/dashboard');
   const roleText4 = await page.locator('text=/ROLE MODE:.*/').innerText();

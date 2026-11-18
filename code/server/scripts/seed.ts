@@ -19,6 +19,7 @@ async function runSeed() {
     const {
       users,
       requests,
+      seedPassword,
       organizations = [],
       resources = [],
       inventories = [],
@@ -44,8 +45,9 @@ async function runSeed() {
     console.log(` • ${incidents.length} major emergency incident groupings`);
 
     console.log('\nDemo User Credentials:');
+    console.log(` • Generated Seed Password: ${seedPassword || '(set via DEMO_USER_PASSWORD)'}`);
     users.forEach((u) => {
-      console.log(` • [${u.role.toUpperCase()}]: ${u.email} / ResQSecure2026!`);
+      console.log(` • [${u.role.toUpperCase()}]: ${u.email}`);
     });
 
     await mongoose.disconnect();

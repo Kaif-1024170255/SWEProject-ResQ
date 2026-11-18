@@ -79,12 +79,43 @@ export function createEnvelope<T extends Record<string, any>>(data: T): T & { _m
  * Initializes the self-hosted Socket.IO server on the existing HTTP server instance.
  */
 export function initSocketIO(httpServer: HttpServer): Server {
+  const allowedOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim().replace(/\/$/, '')).filter(Boolean)
+    : [
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'http://127.0.0.1:5173',
+        'http://127.0.0.1:3000',
+      ];
+
   const io = new Server(httpServer, {
     cors: {
-      origin: '*', // Supports local frontend and testing clients
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        const normalizedOrigin = origin.replace(/\/$/, '');
+
+        // Explicit matching against allowed origins list (no wildcards with credentials)
+        if (allowedOrigins.includes(normalizedOrigin)) {
+          return callback(null, true);
+        }
+
+        // In local development or automated tests, permit localhost/127.0.0.1 explicitly
+        if (
+          process.env.NODE_ENV !== 'production' &&
+          (normalizedOrigin.startsWith('http://localhost:') || normalizedOrigin.startsWith('http://127.0.0.1:'))
+        ) {
+          return callback(null, true);
+        }
+
+        return callback(new Error(`Socket CORS blocked for origin: ${origin}`), false);
+      },
       methods: ['GET', 'POST'],
       credentials: true,
     },
+    transports: ['polling', 'websocket'], // Robust reverse-proxy compatibility (HTTP polling handshake -> WS upgrade)
+    allowUpgrades: true,
+    pingTimeout: 30000,
+    pingInterval: 25000,
   });
 
   // Handshake authentication middleware

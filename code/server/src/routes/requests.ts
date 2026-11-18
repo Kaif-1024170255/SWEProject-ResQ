@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import {
   Request as RequestModel,
   REQUEST_CATEGORIES,
@@ -34,35 +35,58 @@ import {
   broadcastMessageNew,
 } from '../socket';
 import { calculateMatchesForRequest } from '../services/matching';
+import { uploadToGridFS, deleteFromGridFS, validateFileMagicBytes } from '../services/gridfs';
 
 const router = Router();
 
-// Local disk storage configuration for evidence files
-const uploadDir = path.join(process.cwd(), 'uploads', 'evidence');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+// Permitted evidence MIME types and extensions (JPEG, PNG, WEBP, PDF per Prompt 1B)
+const ALLOWED_MIME_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'application/pdf',
+]);
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    cb(null, `${uniqueSuffix}${ext}`);
-  },
-});
+const ALLOWED_EXTENSIONS = new Set([
+  '.jpg',
+  '.jpeg',
+  '.png',
+  '.webp',
+  '.pdf',
+]);
 
+// Memory storage for persistent MongoDB GridFS streaming (no ephemeral local disk reliance)
 const uploadEvidence = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: {
-    fileSize: 15 * 1024 * 1024, // 15 MB limit
+    fileSize: 5 * 1024 * 1024, // 5 MB per Prompt 1B
+  },
+  fileFilter: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (!ALLOWED_MIME_TYPES.has(file.mimetype) || !ALLOWED_EXTENSIONS.has(ext)) {
+      return cb(new Error('Invalid file format. Only JPEG, PNG, WEBP, and PDF files are permitted.'));
+    }
+    cb(null, true);
   },
 });
+
+function handleEvidenceUpload(req: Request, res: Response, next: NextFunction): void {
+  uploadEvidence.single('file')(req, res, (err: any) => {
+    if (err) {
+      if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          res.status(400).json({ error: 'File size exceeds 5 MB limit. Please upload a smaller file.' });
+          return;
+        }
+        res.status(400).json({ error: `Upload error: ${err.message}` });
+        return;
+      }
+      res.status(400).json({ error: err.message || 'File upload failed.' });
+      return;
+    }
+    next();
+  });
+}
 
 /**
  * Optional authentication middleware:
@@ -1500,12 +1524,13 @@ router.post(
   }
 );
 
-// 14. POST /api/requests/:id/evidence - Upload supporting evidence file & save metadata
+// 14. POST /api/requests/:id/evidence - Upload supporting evidence file directly to MongoDB GridFS
 router.post(
   '/:id/evidence',
-  optionalAuth,
-  uploadEvidence.single('file'),
+  requireAuth,
+  handleEvidenceUpload,
   async (req: Request, res: Response): Promise<void> => {
+    let gridFsFileId: mongoose.Types.ObjectId | undefined;
     try {
       const rawId = req.params.id;
       const id = Array.isArray(rawId) ? rawId[0] : rawId;
@@ -1516,30 +1541,74 @@ router.post(
         return;
       }
 
+      // Authorization check: Admin, field responders (volunteer/ngo), original requester, or claimant
+      const user = req.user!;
+      const isAdmin = user.role === 'admin';
+      const isResponder = user.role === 'volunteer' || user.role === 'ngo';
+      const isRequester = requestDoc.createdBy && requestDoc.createdBy.toString() === user.userId;
+      const isClaimant = requestDoc.claimedBy && requestDoc.claimedBy.toString() === user.userId;
+
+      if (!isAdmin && !isResponder && !isRequester && !isClaimant) {
+        res.status(403).json({
+          error: 'Access denied: You are not authorized to attach evidence to this emergency request.',
+        });
+        return;
+      }
+
       if (!req.file) {
         res.status(400).json({ error: 'No file uploaded. Please attach a file under field "file".' });
         return;
       }
 
-      const uploader = req.user ? new mongoose.Types.ObjectId(req.user.userId) : undefined;
-      let uploaderName = 'Anonymous Informant';
-      if (req.user) {
-        uploaderName = req.user.name || `${req.user.role.toUpperCase()} Responder`;
-      } else if (req.body.uploaderName) {
-        uploaderName = String(req.body.uploaderName).trim();
+      // File-content validation: Verify actual binary magic bytes
+      const magicCheck = validateFileMagicBytes(req.file.buffer);
+      if (!magicCheck.isValid) {
+        res.status(400).json({
+          error: 'File content signature verification failed. Only genuine JPEG, PNG, WebP, and PDF files are permitted.',
+        });
+        return;
       }
 
+      // Verify declared MIME type matches detected binary signature
+      if (magicCheck.detectedMime !== req.file.mimetype) {
+        res.status(400).json({
+          error: `Mismatched file format: declared MIME type '${req.file.mimetype}' does not match detected binary signature '${magicCheck.detectedMime}'.`,
+        });
+        return;
+      }
+
+      // Safe unique storage key (never rely on raw client filenames for storage)
+      const ext = path.extname(req.file.originalname).toLowerCase();
+      const storageKey = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}${ext}`;
+
+      // 1. Upload buffer directly to MongoDB GridFS (evidence.files / evidence.chunks)
+      gridFsFileId = await uploadToGridFS(req.file.buffer, storageKey, {
+        contentType: req.file.mimetype,
+        metadata: {
+          originalName: req.file.originalname,
+          requestId: requestDoc._id,
+          uploaderId: user.userId,
+        },
+      });
+
+      // 2. Persist Evidence metadata record
       const evidence = await Evidence.create({
         request: requestDoc._id,
-        uploader,
-        uploaderName,
+        uploader: new mongoose.Types.ObjectId(user.userId),
+        uploaderName: user.name || `${user.role.toUpperCase()} Responder`,
         fileName: req.file.originalname,
         fileType: req.file.mimetype,
-        fileUrl: `/uploads/evidence/${req.file.filename}`,
+        fileUrl: `/api/evidence/pending/file`,
+        gridFsFileId,
+        storageKey,
         fileSize: req.file.size,
         description: req.body.description ? String(req.body.description).trim() : undefined,
         uploadedAt: new Date(),
       });
+
+      // Update fileUrl to use dedicated streaming endpoint
+      evidence.fileUrl = `/api/evidence/${evidence._id}/file`;
+      await evidence.save();
 
       res.status(201).json({
         success: true,
@@ -1548,6 +1617,10 @@ router.post(
       });
     } catch (error) {
       console.error('Evidence upload error:', error);
+      // Clean up orphaned GridFS file if document creation failed
+      if (gridFsFileId) {
+        await deleteFromGridFS(gridFsFileId).catch(() => {});
+      }
       res.status(500).json({ error: 'Failed to process evidence upload.' });
     }
   }
@@ -1579,6 +1652,62 @@ router.get(
     } catch (error) {
       console.error('Fetch evidence error:', error);
       res.status(500).json({ error: 'Failed to retrieve evidence list.' });
+    }
+  }
+);
+
+// 16. DELETE /api/requests/:id/evidence/:evidenceId - Authenticated deletion of evidence
+router.delete(
+  '/:id/evidence/:evidenceId',
+  requireAuth,
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const rawId = req.params.id;
+      const id = Array.isArray(rawId) ? rawId[0] : rawId;
+      const requestDoc = await RequestModel.findOne(getRequestQuery(id));
+
+      if (!requestDoc) {
+        res.status(404).json({ error: 'Request not found.' });
+        return;
+      }
+
+      const rawEvidenceId = req.params.evidenceId;
+      const evidenceId = Array.isArray(rawEvidenceId) ? rawEvidenceId[0] : rawEvidenceId;
+      if (!mongoose.isValidObjectId(evidenceId)) {
+        res.status(400).json({ error: 'Invalid evidence identifier.' });
+        return;
+      }
+
+      const evidence = await Evidence.findById(evidenceId);
+      if (!evidence || evidence.request.toString() !== requestDoc._id.toString()) {
+        res.status(404).json({ error: 'Evidence attachment not found for this request.' });
+        return;
+      }
+
+      const user = req.user!;
+      const isAdmin = user.role === 'admin';
+      const isUploader = evidence.uploader && evidence.uploader.toString() === user.userId;
+
+      if (!isAdmin && !isUploader) {
+        res.status(403).json({
+          error: 'Access denied: Only the uploader or an administrator can delete evidence.',
+        });
+        return;
+      }
+
+      if (evidence.gridFsFileId) {
+        await deleteFromGridFS(evidence.gridFsFileId);
+      }
+
+      await Evidence.findByIdAndDelete(evidence._id);
+
+      res.status(200).json({
+        success: true,
+        message: 'Evidence attachment deleted successfully.',
+      });
+    } catch (error) {
+      console.error('Delete evidence error:', error);
+      res.status(500).json({ error: 'Failed to delete evidence attachment.' });
     }
   }
 );

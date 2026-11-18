@@ -7,6 +7,8 @@ export interface IEvidence extends Document {
   fileName: string;
   fileType: string;
   fileUrl: string;
+  gridFsFileId?: Types.ObjectId;
+  storageKey?: string;
   fileSize?: number;
   description?: string;
   uploadedAt: Date;
@@ -45,6 +47,14 @@ const evidenceSchema = new Schema<IEvidence>(
     fileUrl: {
       type: String,
       required: [true, 'File URL is required'],
+      trim: true,
+    },
+    gridFsFileId: {
+      type: Schema.Types.ObjectId,
+      index: true,
+    },
+    storageKey: {
+      type: String,
       trim: true,
     },
     fileSize: {

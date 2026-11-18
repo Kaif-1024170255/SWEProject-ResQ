@@ -40,12 +40,16 @@ export function connectSocket(token?: string | null): Socket {
     return socket;
   }
 
-  // Connects through current origin (proxied by Vite to port 5000 in dev)
-  const socketUrl = window.location.origin;
+  // Connects through configured WS/API URL in production or current origin in local dev
+  const socketUrl =
+    (import.meta as any).env?.VITE_WS_URL ||
+    (import.meta as any).env?.VITE_API_URL ||
+    (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5000');
 
   socket = io(socketUrl, {
     autoConnect: true,
-    transports: ['websocket', 'polling'],
+    transports: ['polling', 'websocket'], // Supports polling handshake & transparent websocket upgrades
+    withCredentials: true,
     auth: {
       token: effectiveToken || undefined,
     },

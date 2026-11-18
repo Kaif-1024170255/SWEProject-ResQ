@@ -19,6 +19,7 @@ async function runFreshPilotSeed() {
     const {
       users,
       requests,
+      seedPassword,
       organizations = [],
       resources = [],
       inventories = [],
@@ -34,7 +35,7 @@ async function runFreshPilotSeed() {
     console.log(` • ${inventories.length} depot inventory records available`);
     console.log(` • ${categories.length} emergency categories ready`);
     console.log(` • ${requests.length} active/historical requests (Clean slate: 0 requests)`);
-    console.log(`\nAll 5 accounts ready with password: ResQSecure2026!`);
+    console.log(`\nAll 5 accounts ready with password: ${seedPassword || '(set via DEMO_USER_PASSWORD)'}`);
     console.log(` - Affected Person:    amrita.devi@example.org`);
     console.log(` - Volunteer:          rahul.volunteer@example.org`);
     console.log(` - NGO Coordinator:    dispatch@punjabrelief.org`);

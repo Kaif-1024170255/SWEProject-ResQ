@@ -9,6 +9,15 @@ node_modules/
 .env.*
 *.env
 *.env.local
+*.env.*.local
+
+# Credential lists & pilot exports
+*credentials*
+*credential*
+credentials/
+*pilot-results*.json
+*pilot*.json
+pilot_results/
 
 # Build outputs
 dist/

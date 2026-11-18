@@ -2,6 +2,7 @@ import { chromium } from '@playwright/test';
 import path from 'path';
 
 async function capture() {
+  const demoPassword = process.env.DEMO_USER_PASSWORD || process.env.DEMO_PASSWORD || 'test-local-password';
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({ viewport: { width: 1440, height: 1200 } });
   const page = await context.newPage();
@@ -9,7 +10,7 @@ async function capture() {
   // Login as admin
   await page.goto('http://localhost:5173/login');
   await page.fill('input[type="email"]', 'admin@resq.org');
-  await page.fill('input[type="password"]', 'ResQSecure2026!');
+  await page.fill('input[type="password"]', demoPassword);
   await page.click('button[type="submit"]');
   await page.waitForURL('**/admin');
 

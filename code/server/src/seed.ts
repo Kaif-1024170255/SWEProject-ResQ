@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import {
   User,
@@ -18,10 +19,12 @@ import {
   seedDefaultCategories,
 } from './models';
 import { recordTelemetrySample } from './socket';
+import { uploadToGridFS } from './services/gridfs';
 
 export interface SeedResult {
   users: IUser[];
   requests: IRequest[];
+  seedPassword?: string;
   organizations?: any[];
   resources?: any[];
   inventories?: any[];
@@ -38,7 +41,7 @@ export interface SeedResult {
  * assignments, verifications, notifications, messages, and incidents
  * to provide a comprehensive, production-grade operations demo.
  */
-export async function seedDatabase(options?: { freshPilot?: boolean }): Promise<SeedResult> {
+export async function seedDatabase(options?: { freshPilot?: boolean; password?: string }): Promise<SeedResult> {
   // Clear existing data across all collections
   await User.deleteMany({});
   await Request.deleteMany({});
@@ -82,7 +85,8 @@ export async function seedDatabase(options?: { freshPilot?: boolean }): Promise<
     },
   ]);
 
-  const defaultPasswordHash = await bcrypt.hash('ResQSecure2026!', 10);
+  const rawPassword = options?.password || process.env.DEMO_USER_PASSWORD || crypto.randomBytes(12).toString('base64url');
+  const defaultPasswordHash = await bcrypt.hash(rawPassword, 10);
 
   // 1. Create realistic sample users (one per role)
   const users = await User.create([
@@ -974,6 +978,7 @@ export async function seedDatabase(options?: { freshPilot?: boolean }): Promise<
     return {
       users,
       requests: [],
+      seedPassword: rawPassword,
       organizations,
       resources,
       inventories,
@@ -1168,7 +1173,25 @@ export async function seedDatabase(options?: { freshPilot?: boolean }): Promise<
     },
   ]);
 
-  // 9. Create Evidence metadata on reqRooftop (REQ-2026-004808)
+  // 9. Create Evidence metadata on reqRooftop (REQ-2026-004808) & persistent GridFS seed file
+  const sampleRooftopJpg = Buffer.from(
+    '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=',
+    'base64'
+  );
+  let seedGridFsId;
+  try {
+    seedGridFsId = await uploadToGridFS(
+      sampleRooftopJpg,
+      'sample_rooftop_flooding.jpg',
+      {
+        contentType: 'image/jpeg',
+        metadata: { seed: true, requestId: reqRooftop._id },
+      }
+    );
+  } catch (_e) {
+    // Graceful fallback if GridFS bucket is not available in mock environments
+  }
+
   const evidence = await Evidence.create([
     {
       request: reqRooftop._id,
@@ -1177,6 +1200,8 @@ export async function seedDatabase(options?: { freshPilot?: boolean }): Promise<
       fileName: 'rooftop_flooding_sector4.jpg',
       fileType: 'image/jpeg',
       fileUrl: '/uploads/evidence/sample_rooftop_flooding.jpg',
+      gridFsFileId: seedGridFsId,
+      storageKey: 'sample_rooftop_flooding.jpg',
       fileSize: 1845200,
       description: 'Photo taken from rooftop showing flood level at ground-floor ceiling.',
       uploadedAt: new Date(now - 35 * 60 * 1000),
@@ -1219,6 +1244,7 @@ export async function seedDatabase(options?: { freshPilot?: boolean }): Promise<
   return {
     users,
     requests,
+    seedPassword: rawPassword,
     organizations,
     resources,
     inventories,
