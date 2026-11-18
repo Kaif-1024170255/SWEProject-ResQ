@@ -3,105 +3,15 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth, AuthUser } from '../context/AuthContext';
 import { ServerColdStartNotice, useColdStartDelay } from '../components/ServerColdStartNotice';
 
-interface DemoAccount {
-  role: string;
-  roleBadge: string;
-  name: string;
-  email: string;
-  borderClass: string;
-  badgeClass: string;
-  description: string;
-  capabilities: string[];
-}
-
-const DEMO_ACCOUNTS: DemoAccount[] = [
-  {
-    role: 'admin',
-    roleBadge: 'ADMIN',
-    name: 'Central Dispatch Admin',
-    email: 'admin@resq.org',
-    borderClass: 'border-l-rust',
-    badgeClass: 'text-rust',
-    description: 'Dispatch Commander with top-level system authority.',
-    capabilities: [
-      'Verify unverified emergency requests',
-      'Manage Emergency Categories & Priority levels',
-      'Group related requests under Incidents',
-      'View unredacted coordinates & contact details',
-    ],
-  },
-  {
-    role: 'volunteer',
-    roleBadge: 'VOLUNTEER',
-    name: 'Rahul Sharma',
-    email: 'rahul.volunteer@example.org',
-    borderClass: 'border-l-teal',
-    badgeClass: 'text-teal',
-    description: 'First responder operating on the ground in disaster sectors.',
-    capabilities: [
-      'View operations rail & live incident map',
-      'Claim verified emergency requests',
-      'Mark claimed requests as resolved on scene',
-      'Post field messages & upload photo evidence',
-    ],
-  },
-  {
-    role: 'ngo',
-    roleBadge: 'NGO COORDINATOR',
-    name: 'Punjab Relief Network',
-    email: 'dispatch@punjabrelief.org',
-    borderClass: 'border-l-ink',
-    badgeClass: 'text-ink',
-    description: 'Relief organization coordinating multi-responder operations.',
-    capabilities: [
-      'Coordinate team-wide crisis responses',
-      'Claim high-load logistics & rescue missions',
-      'Assign relief inventory & resources to requests',
-      'Coordinate via request communication thread',
-    ],
-  },
-  {
-    role: 'resource_provider',
-    roleBadge: 'RESOURCE PROVIDER',
-    name: 'Ludhiana Medical Supplies Depot',
-    email: 'logistics@ludhianamedical.org',
-    borderClass: 'border-l-ink',
-    badgeClass: 'text-ink',
-    description: 'Depot & logistics provider supplying materials, medical gear, and power.',
-    capabilities: [
-      'Claim supply & equipment requests',
-      'Track stock allocation and supply delivery',
-      'Upload delivery receipts as supporting evidence',
-      'Mark logistics requests as resolved',
-    ],
-  },
-  {
-    role: 'affected_person',
-    roleBadge: 'AFFECTED PERSON',
-    name: 'Amrita Devi',
-    email: 'amrita.devi@example.org',
-    borderClass: 'border-l-amber',
-    badgeClass: 'text-amber',
-    description: 'Citizen experiencing an emergency seeking assistance.',
-    capabilities: [
-      'Submit emergency crisis requests without prior account',
-      'Track live request progress through 5-stage lifecycle',
-      'Communicate directly with assigned responders via comms log',
-      'Confirm resolution once help is received to close ticket',
-    ],
-  },
-];
-
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [quickLoginRole, setQuickLoginRole] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [formFeedback, setFormFeedback] = useState<string | null>(null);
   const isWakingServer = useColdStartDelay(isSubmitting, 2000);
 
   const authenticateWith = async (loginEmail: string, loginPassword: string) => {
@@ -114,13 +24,16 @@ export default function LoginPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email: loginEmail, password: loginPassword }),
+        body: JSON.stringify({
+          email: loginEmail.toLowerCase().trim(),
+          password: loginPassword,
+        }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Authentication failed. Verify email and password.');
+        throw new Error(data.error || 'Authentication failed. Please verify your email and password.');
       }
 
       const user = data.user as AuthUser;
@@ -140,27 +53,20 @@ export default function LoginPage() {
       }
     } finally {
       setIsSubmitting(false);
-      setQuickLoginRole(null);
     }
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!email.trim() || !password) {
+      setErrorMessage('Please enter both email address and password.');
+      return;
+    }
     await authenticateWith(email, password);
   };
 
-  const handleSelectAccount = (demoAccount: DemoAccount) => {
-    setEmail(demoAccount.email);
-    setFormFeedback(`Selected ${demoAccount.roleBadge} account (${demoAccount.email}). Please enter your password above.`);
-    // Smooth scroll to top form
-    const formElement = document.getElementById('login-form-card');
-    if (formElement) {
-      formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  };
-
   return (
-    <div className="max-w-[620px] mx-auto px-4 py-12">
+    <div className="max-w-[480px] mx-auto px-4 py-12 sm:py-16">
       {/* Header Context */}
       <div className="font-mono text-xs text-slate tracking-wide mb-1">
         resQ / OPERATIONS ACCESS / AUTH
@@ -168,19 +74,23 @@ export default function LoginPage() {
       <h1 className="text-2xl font-bold text-ink mb-2">
         Log in to resQ
       </h1>
-      <p className="text-slate text-sm mb-4">
-        Sign in with an operational role to access your emergency requests and dispatch desk.
+      <p className="text-slate text-sm mb-6">
+        Sign in with your operational credentials to access your emergency requests and dispatch desk.
       </p>
 
-      {/* Direct link to public emergency report map */}
-      <div className="mb-6 p-3 bg-paper-raised border border-slate-line border-l-[3px] border-l-rust flex items-center justify-between">
+      {/* Immediate emergency report banner for citizens */}
+      <div className="mb-6 p-3 bg-paper-raised border border-slate-line border-l-[3px] border-l-rust flex items-center justify-between gap-3">
         <div>
-          <div className="font-mono text-xs font-semibold text-rust uppercase">Need Immediate Emergency Help?</div>
-          <div className="text-xs text-slate">Report an incident directly on the map without logging in.</div>
+          <div className="font-mono text-xs font-semibold text-rust uppercase">
+            Need Immediate Emergency Help?
+          </div>
+          <div className="text-xs text-slate mt-0.5">
+            Report an incident directly on the map without logging in.
+          </div>
         </div>
         <Link
           to="/submit"
-          className="ml-3 shrink-0 font-sans text-xs font-semibold px-3 py-1.5 bg-rust text-white rounded-[3px] hover:opacity-90"
+          className="shrink-0 font-sans text-xs font-semibold px-3 py-1.5 min-h-[36px] inline-flex items-center bg-rust text-white rounded-[3px] hover:opacity-90"
         >
           Submit Request
         </Link>
@@ -188,69 +98,78 @@ export default function LoginPage() {
 
       {/* Error Banner */}
       {errorMessage && (
-        <div className="mb-6 p-3 bg-paper-raised border border-slate-line border-l-[3px] border-l-rust">
-          <div className="flex items-center gap-2 font-mono text-xs text-rust font-semibold">
-            <span className="w-1.5 h-1.5 bg-rust inline-block"></span>
-            AUTH ERROR: {errorMessage}
+        <div
+          role="alert"
+          className="mb-6 p-3 bg-paper-raised border border-slate-line border-l-[3px] border-l-rust"
+        >
+          <div className="flex items-start gap-2 font-mono text-xs text-rust font-semibold">
+            <span className="w-1.5 h-1.5 bg-rust inline-block mt-1 shrink-0"></span>
+            <span>AUTH ERROR: {errorMessage}</span>
           </div>
-        </div>
-      )}
-
-      {/* Form Feedback Banner (When "Fill Form" is clicked) */}
-      {formFeedback && (
-        <div className="mb-4 p-3 bg-paper-raised border border-slate-line border-l-[3px] border-l-teal flex items-center justify-between">
-          <div className="flex items-center gap-2 font-mono text-xs text-teal font-semibold">
-            <span className="w-1.5 h-1.5 bg-teal inline-block"></span>
-            FORM POPULATED: {formFeedback}
-          </div>
-          <button
-            type="button"
-            onClick={() => setFormFeedback(null)}
-            className="font-mono text-[11px] text-slate hover:text-ink cursor-pointer ml-3 shrink-0"
-          >
-            [dismiss]
-          </button>
         </div>
       )}
 
       {/* Login Form Container */}
-      <div id="login-form-card" className="bg-paper-raised border border-slate-line p-6">
+      <div id="login-form-card" className="bg-paper-raised border border-slate-line p-6 sm:p-8 rounded-[3px]">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-ink uppercase tracking-wider font-mono mb-1.5">
+            <label
+              htmlFor="login-email"
+              className="block text-xs font-semibold text-ink uppercase tracking-wider font-mono mb-1.5"
+            >
               Email Address
             </label>
             <input
+              id="login-email"
               type="email"
               required
+              autoFocus
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="e.g. operator@example.org"
-              className="w-full bg-white border border-slate-line focus:border-ink rounded-[3px] font-sans px-3 py-2 text-sm text-ink outline-none"
+              placeholder="e.g. operator@resq.org"
+              className="w-full bg-white border border-slate-line focus:border-ink rounded-[3px] font-sans px-3.5 py-2.5 text-sm text-ink outline-none transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-ink uppercase tracking-wider font-mono mb-1.5">
-              Password
-            </label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full bg-white border border-slate-line focus:border-ink rounded-[3px] font-sans px-3 py-2 text-sm text-ink outline-none"
-            />
+            <div className="flex items-center justify-between mb-1.5">
+              <label
+                htmlFor="login-password"
+                className="block text-xs font-semibold text-ink uppercase tracking-wider font-mono"
+              >
+                Password
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="font-mono text-[11px] text-slate hover:text-ink cursor-pointer focus:outline-none"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                [{showPassword ? 'Hide' : 'Show'}]
+              </button>
+            </div>
+            <div className="relative">
+              <input
+                id="login-password"
+                type={showPassword ? 'text' : 'password'}
+                required
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••••••"
+                className="w-full bg-white border border-slate-line focus:border-ink rounded-[3px] font-sans px-3.5 py-2.5 text-sm text-ink outline-none transition-colors pr-10"
+              />
+            </div>
           </div>
 
           <div className="pt-2">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-ink text-white font-sans text-sm font-semibold px-5 py-2.5 rounded-[3px] border border-transparent hover:bg-ink-soft disabled:opacity-50 cursor-pointer"
+              className="w-full bg-ink text-white font-sans text-sm font-semibold px-5 py-2.5 min-h-[42px] inline-flex items-center justify-center rounded-[3px] border border-transparent hover:bg-ink-soft disabled:opacity-50 cursor-pointer transition-colors"
             >
-              {isSubmitting && !quickLoginRole ? 'Verifying credentials...' : 'Log in'}
+              {isSubmitting ? 'Verifying credentials...' : 'Log in'}
             </button>
           </div>
 
@@ -261,7 +180,7 @@ export default function LoginPage() {
           )}
         </form>
 
-        <div className="mt-6 pt-4 border-t border-slate-line flex items-center justify-between text-xs text-slate">
+        <div className="mt-6 pt-4 border-t border-slate-line flex flex-wrap items-center justify-between gap-2 text-xs text-slate">
           <span>Need an account?</span>
           <Link
             to="/register"
@@ -272,82 +191,12 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Quick Demo Credentials Panel for ALL 5 Roles */}
-      <div className="mt-6 bg-paper-raised border border-slate-line p-5">
-        <div className="flex items-center justify-between border-b border-slate-line pb-2 mb-3">
-          <div className="font-mono text-xs text-ink font-semibold uppercase tracking-wider">
-            Demo Accounts By Role
-          </div>
-          <div className="font-mono text-[11px] text-slate italic">
-            Passwords provisioned securely on backend
-          </div>
-        </div>
-
-        {/* Clear Explanation */}
-        <div className="mb-4 p-2.5 bg-paper border border-slate-line text-[11px] text-slate space-y-1 font-mono">
-          <div className="text-ink font-semibold">ROLE ACCESS SELECTION:</div>
-          <div>
-            Click <span className="text-ink font-semibold">Select Account</span> to populate the email address in the form above, then sign in with the password provisioned for this deployment.
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          {DEMO_ACCOUNTS.map((acc) => {
-            return (
-              <div
-                key={acc.role}
-                className={`p-3 bg-white border border-slate-line border-l-[4px] ${acc.borderClass} space-y-2`}
-              >
-                {/* Header: Consistent 2-column layout that prevents wrapping mismatches */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-line/50 pb-2">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className={`font-mono text-xs font-bold uppercase tracking-wide ${acc.badgeClass}`}>
-                        [{acc.roleBadge}]
-                      </span>
-                      <span className="text-xs text-ink font-medium">
-                        {acc.name}
-                      </span>
-                    </div>
-                    <div className="font-mono text-[11px] text-slate mt-0.5 truncate">
-                      {acc.email}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
-                    <button
-                      type="button"
-                      onClick={() => handleSelectAccount(acc)}
-                      title="Populate email in the login form above"
-                      className="font-mono text-[11px] font-semibold text-ink px-3 py-1 border border-slate-line rounded-[3px] hover:bg-paper hover:border-ink cursor-pointer bg-white"
-                    >
-                      Select Account
-                    </button>
-                  </div>
-                </div>
-
-                <div className="text-xs text-ink-soft">
-                  {acc.description}
-                </div>
-
-                {/* Role capabilities bullet summary */}
-                <div className="pt-1">
-                  <div className="font-mono text-[10px] text-slate uppercase tracking-wider mb-1">
-                    Role Capabilities:
-                  </div>
-                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-0.5 text-[11px] text-slate font-sans">
-                    {acc.capabilities.map((cap, i) => (
-                      <li key={i} className="flex items-start gap-1">
-                        <span className="text-slate-line font-mono select-none">•</span>
-                        <span>{cap}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      {/* Quick Navigation Help */}
+      <div className="mt-6 text-center text-xs text-slate">
+        Looking for a previously filed emergency?{' '}
+        <Link to="/track" className="text-ink underline hover:text-ink-soft font-mono">
+          Track request by ID
+        </Link>
       </div>
     </div>
   );
