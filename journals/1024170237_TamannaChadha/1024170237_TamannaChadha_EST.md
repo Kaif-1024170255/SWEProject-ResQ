@@ -23,3 +23,7 @@
 - Assisted with data support for testing and analytics-related functionality.
 - Helped identify and resolve database-related issues found during final integration.
 - Reviewed database configuration requirements for future deployment.
+
+## Week 8 --- Deployment and Finalization
+- Configured MongoDB Atlas and production environment variables for live database connectivity.
+- Improved the login interface by removing demo account shortcuts and refining the authentication experience.

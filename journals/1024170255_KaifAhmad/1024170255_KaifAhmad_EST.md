@@ -23,3 +23,6 @@
 - Assisted with resolving integration issues found during testing.
 - Prepared deployment requirements and configuration for later production deployment.
 - Deployment will be handled later after the application is considered stable.
+
+## Week 8 --- Deployment and Finalization
+- Performed final testing, resolved deployment issues, and prepared the application for the final project demonstration.

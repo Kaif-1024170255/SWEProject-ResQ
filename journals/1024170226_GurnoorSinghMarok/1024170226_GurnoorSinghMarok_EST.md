@@ -22,3 +22,7 @@
 - Checked authorization and validation behavior for newly added backend operations.
 - Worked with Kaif on testing real-time event behavior and backend integration.
 - Helped identify and fix backend issues found during final testing.
+
+## Week 8 --- Deployment and Finalization
+- Integrated and verified real-time communication, emergency request tracking, and evidence upload functionality.
+- Created and tested six role-based demo accounts with realistic production seed data.
